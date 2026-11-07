@@ -1,1 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TONIR Financial Readiness Command Center</title>
+    <!-- Tailwind CSS for modern executive UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+<style>
+    @media print {
+        body { background: #ffffff !important; color: #000000 !important; }
+        header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal, #selection-warning-modal, .no-print { display: none !important; }
+        .bg-slate-900, .bg-slate-950 { background: #ffffff !important; border-color: #cbd5e1 !important; color: #000000 !important; box-shadow: none !important; }
+        input, select { border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #000000 !important; }
+    }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+    
+    <!-- Terms & License Agreement Modal -->
+    <div id="license-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full p-8 shadow-2xl space-y-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider">TONIR</div>
+                <div>
+                    <h2 class="text-xl font-bold text-slate-100">Proprietary Software & Non-Commercial License</h2>
+                    <p class="text-xs text-slate-400">Copyright (C) 2026 Stefan T Falls. All Rights Reserved.</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs text-slate-300 space-y-3 max-h-60 overflow-y-auto leading-relaxed">
+                <p><strong class="text-white">NOTICE:</strong> This software and its underlying architecture, formulas, and operational design represent extensive proprietary development and refinement.</p>
+                <p><strong class="text-amber-400">Strict Non-Commercial Use License:</strong> You are granted a limited, personal, non-exclusive right to use this tool for individual financial tracking and readiness evaluations.</p>
+                <p><strong class="text-red-400">Prohibited Actions:</strong> Redistribution, reverse engineering, modification, or commercial exploitation—including incorporation into paid services, corporate consulting tools, SaaS products, or monetization in any form—is <strong class="text-white underline">strictly prohibited</strong> without explicit written authorization from the author.</p>
+            </div>
 
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+                <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
+                    <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" oninput="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <span>I have read and agree to the Non-Commercial License terms.</span>
+                </label>
+                <button id="license-agree-btn" onclick="acceptLicense()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap">I Agree & Enter Command Center</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection Warning Modal -->
+    <div id="selection-warning-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-600 text-white font-black p-2.5 rounded-xl text-lg">⚠️</div>
+                <div>
+                    <h3 id="warning-modal-title" class="text-lg font-bold text-amber-400">Selection Required</h3>
+                    <p id="warning-modal-subtitle" class="text-xs text-slate-400">Planning horizon missing.</p>
+                </div>
+            </div>
+            
+            <p id="warning-modal-desc" class="text-xs text-slate-300 leading-relaxed">
+                Please select a specific <strong class="text-white">Year</strong> and <strong class="text-white">Month</strong> tab first before loading the example template.
+            </p>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="closeSelectionWarningModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Data Warning Modal -->
+    <div id="clear-warning-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-red-900/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center space-x-3">
+                <div class="bg-red-600 text-white font-black p-2.5 rounded-xl text-lg">⚠️</div>
+                <div>
+                    <h3 class="text-lg font-bold text-red-400">WARNING: Data Erasure Options</h3>
+                    <p id="clear-modal-subtitle" class="text-xs text-slate-400">Choose scope of data removal.</p>
+                </div>
+            </div>
+            
+            <p id="clear-modal-desc" class="text-xs text-slate-300 leading-relaxed">
+                You can choose to clear entries exclusively for the currently active tab or perform a full global wipe of all stored data.
+            </p>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center space-x-2">
+                <input type="checkbox" id="confirm-clear-checkbox" onchange="toggleClearButton()" onclick="toggleClearButton()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500 cursor-pointer">
+                <label for="confirm-clear-checkbox" class="text-xs text-slate-300 cursor-pointer select-none">I understand this data cannot be recovered without a backup.</label>
+            </div>
+
+            <div class="flex flex-wrap justify-end gap-2 pt-2">
+                <button onclick="closeClearWarningModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2.5 rounded-lg transition">Cancel</button>
+                <button id="confirm-clear-tab-btn" onclick="executeClearCurrentTab()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition">Clear Selected Tab Only</button>
+                <button id="confirm-clear-all-btn" onclick="executeClearAllData()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition">Wipe All Data (Global)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider">TONIR</div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Total Obligations to Net Income Ratio</h1>
+                    <p class="text-xs text-slate-400">Multi-Year & Monthly Granular Financial Readiness Engine</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button onclick="toggleGuideModal()" class="bg-blue-600/90 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition border border-blue-400 shadow-md shadow-blue-900/50">Auditor's Guide</button>
+                <button onclick="openExportModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export Backup</button>
+                <button onclick="exportToPDF()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export PDF Report</button>
+                <button onclick="triggerImport()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Import Backup</button>
+                <input type="file" id="import-file-input" class="hidden" accept=".tonir,.json" onchange="handleFileImport(event)">
+                <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition">Save Progress</button>
+                <button onclick="openClearWarningModal()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition shadow-lg shadow-red-950/50">Clear Data</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
+        
+        <!-- Welcome / Instructions Banner -->
+        <div class="bg-blue-950/40 border border-blue-900/50 rounded-2xl p-5 text-sm text-blue-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
+            <div>
+                <strong class="text-white font-semibold block mb-1">TONIR Dashboard Control Center</strong>
+                <p class="text-xs text-blue-300">Select an individual Month below to enter data or load templates. Annual Baseline aggregates all months.</p>
+            </div>
+            <button onclick="loadSampleTemplate()" class="bg-blue-900/60 hover:bg-blue-800 text-blue-200 text-xs px-3 py-2 rounded-lg border border-blue-700/50 transition whitespace-nowrap">Load Example Template</button>
+        </div>
+
+        <!-- MULTI-YEAR & MONTHLY TABS COMMAND CONTROL -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 no-print">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Select Planning Horizon</h2>
+                    <p class="text-xs text-slate-500">Currently active period: <span id="active-period-label" class="text-blue-400 font-bold">None Selected</span></p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="promptAddYear()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 transition">+ Custom Year</button>
+                    <button onclick="copyCurrentPeriodToNextMonth()" class="bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-700/50 transition">Copy to Next Month</button>
+                </div>
+            </div>
+
+            <!-- Years Navigation Row -->
+            <div id="year-tabs-container" class="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar border-b border-slate-800">
+                <!-- Dynamically populated year buttons -->
+            </div>
+
+            <!-- Months Sub-Navigation Row -->
+            <div id="month-tabs-container" class="flex space-x-1.5 overflow-x-auto pt-1 hide-scrollbar">
+                <!-- Dynamically populated month buttons -->
+            </div>
+        </section>
+
+        <!-- DASHBOARD COMMAND CENTER -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+            <h2 class="text-lg font-semibold text-slate-200 flex items-center justify-between">
+                <span class="flex items-center"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full mr-2"></span> TONIR Dashboard Summary</span>
+                <span id="dashboard-period-badge" class="text-xs bg-blue-950 text-blue-400 border border-blue-800 px-3 py-1 rounded-md">Unselected</span>
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- 1. Total Obligations to Net Income Ratio -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Total Obligations / Net Income</span>
+                        <div id="metric-tonir" class="text-3xl font-black text-slate-100">0.0%</div>
+                    </div>
+                    <div id="tonir-zone-badge" class="mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-slate-800 text-slate-300">Zone - Uncalculated</div>
+                </div>
+
+                <!-- 2. Traditional Debt to Income Ratio -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Traditional DTI (Debt / Gross)</span>
+                        <div id="metric-dti" class="text-3xl font-black text-slate-100">0.0%</div>
+                    </div>
+                    <span class="text-xs text-slate-500 mt-4">Legal, CCs, Loans, Mortgage vs Gross</span>
+                </div>
+
+                <!-- 3. Net Financial Position (Balance Sheet) -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Net Financial Position</span>
+                        <div id="metric-networth" class="text-3xl font-black text-slate-100">$0.00</div>
+                    </div>
+                    <div class="mt-4 text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+                        <span>Assets: <strong id="metric-assets" class="text-slate-200">$0.00</strong></span>
+                        <span>Liab: <strong id="metric-liab" class="text-slate-200">$0.00</strong></span>
+                    </div>
+                </div>
+
+                <!-- 4. Monthly / Yearly Cash Flow Performance -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <span id="metric-savings-title" class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Net Monthly Cash Flow</span>
+                        <div id="metric-savings-actual" class="text-3xl font-black text-slate-100">$0.00</div>
+                    </div>
+                    <div class="mt-4 text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
+                        <span>Net Income: <strong id="metric-savings-proj" class="text-slate-200">$0.00</strong></span>
+                        <span>Obligations: <strong id="metric-savings-diff" class="text-slate-200">$0.00</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stability Zone Scale Reference -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">TONIR Scale Reference</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
+                    <div id="scale-z1" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-emerald-400 block">0-39%</span> Zone 1 (Green): Elite</div>
+                    <div id="scale-z2" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-yellow-400 block">40-59%</span> Zone 2 (Yellow): Healthy</div>
+                    <div id="scale-z3" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-orange-400 block">60-79%</span> Zone 3 (Orange): Paycheck</div>
+                    <div id="scale-z4" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-red-400 block">80-99%</span> Zone 4 (Red): Fragile</div>
+                    <div id="scale-z5" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-purple-400 block">100%+</span> Zone 5 (Black): Survival</div>
+                </div>
+            </div>
+
+            <!-- Category Spending Breakdown Bar -->
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Obligation Category Breakdown</h3>
+                    <span id="breakdown-total-label" class="text-xs text-slate-400 font-medium">Total Obligations: $0.00</span>
+                </div>
+                <div id="breakdown-bar" class="w-full h-4 bg-slate-900 rounded-lg overflow-hidden flex shadow-inner">
+                    <div class="h-full bg-slate-700 w-full flex items-center justify-center text-[9px] text-slate-500">No Obligations</div>
+                </div>
+                <div id="breakdown-legend" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px] pt-1">
+                </div>
+            </div>
+        </section>
+
+        <!-- 12 INDEPENDENT SECTIONS -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- 1. Income -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">1. Income</h3>
+                    <button onclick="addItem('income')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Income</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Source</th><th class="pb-2">Frequency</th><th class="pb-2">Net ($)</th><th class="pb-2">Gross ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-income"></tbody>
+                </table>
+            </div>
+
+            <!-- 2. Assets and Liabilities -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">2. Assets and Liabilities (Balance Sheet)</h3>
+                    <button onclick="addItem('assets_liabilities')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Account / Debt</button>
+                </div>
+                <p class="text-xs text-slate-400 mb-3">Tracks net worth only. Does not deduct principal balances from monthly cash flow.</p>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Institution / Name</th><th class="pb-2">Type</th><th class="pb-2">Balance ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-assets_liabilities"></tbody>
+                </table>
+            </div>
+
+            <!-- 3. Credit Cards -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">3. Credit Cards</h3>
+                    <button onclick="addItem('credit_cards')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Card</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Card Name</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-credit_cards"></tbody>
+                </table>
+            </div>
+
+            <!-- 4. Food and Shopping -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">4. Food and Shopping</h3>
+                    <button onclick="addItem('food_shopping')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Entry</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Description</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-food_shopping"></tbody>
+                </table>
+            </div>
+
+            <!-- 5. Fuel -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">5. Fuel</h3>
+                    <button onclick="addItem('fuel')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Fuel Log</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Vehicle / Desc</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-fuel"></tbody>
+                </table>
+            </div>
+
+            <!-- 6. Investments -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">6. Investments</h3>
+                    <button onclick="addItem('investments')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Investment</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Investment / Account</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-investments"></tbody>
+                </table>
+            </div>
+
+            <!-- 7. Insurance -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">7. Insurance</h3>
+                    <button onclick="addItem('insurance')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Policy</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Provider / Policy</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-insurance"></tbody>
+                </table>
+            </div>
+
+            <!-- 8. Legal -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">8. Legal</h3>
+                    <button onclick="addItem('legal')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Obligation</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Obligation</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-legal"></tbody>
+                </table>
+            </div>
+
+            <!-- 9. Loans -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">9. Loans (Monthly Payment Obligation)</h3>
+                    <button onclick="addItem('loans')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Loan</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Loan / Creditor</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-loans"></tbody>
+                </table>
+            </div>
+
+            <!-- 10. Mortgage or Rent -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">10. Mortgage or Rent</h3>
+                    <button onclick="addItem('mortgage_rent')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Housing</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Housing Item</th><th class="pb-2">Count in DTI?</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-mortgage_rent"></tbody>
+                </table>
+            </div>
+
+            <!-- 11. Subscription Services -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">11. Subscription Services</h3>
+                    <button onclick="addItem('subscription_services')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Subscription</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Service Name</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-subscription_services"></tbody>
+                </table>
+            </div>
+
+            <!-- 12. Utilities -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-200">12. Utilities</h3>
+                    <button onclick="addItem('utilities')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg transition">+ Add Utility</button>
+                </div>
+                <table class="w-full text-left text-xs">
+                    <thead><tr class="border-b border-slate-800 text-slate-400"><th class="pb-2">Utility Service</th><th class="pb-2">Projected ($)</th><th class="pb-2">Actual ($)</th><th class="pb-2">Action</th></tr></thead>
+                    <tbody id="table-utilities"></tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Auditor's Guide & Manual Modal -->
+    <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-100">Auditor's Guide & Manual</h3>
+                    <p class="text-sm text-slate-400">TONIR Setup Philosophy, Section Guide & Multi-Year Reference</p>
+                </div>
+                <button onclick="toggleGuideModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-3 py-1">×</button>
+            </div>
+            <div class="p-8 overflow-y-auto space-y-8 text-sm text-slate-200 leading-relaxed">
+                
+                <!-- Section 1: Architecture & Setup -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Multi-Year & Monthly Tracking Architecture</h4>
+                    <p class="text-xs text-slate-300">You can navigate across years (2026-2036+) and drill down into specific months. Use the <strong>"Copy to Next Month"</strong> feature to quickly duplicate recurring bills without manually re-entering your fixed numbers each month. The <strong>Annual Baseline</strong> tab provides a clean rollup view across all populated months.</p>
+                </div>
+
+                <!-- Section 2: Setup Philosophy & Routine -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Setup Philosophy & Sustainable Routine</h4>
+                    
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <p><strong class="text-white">First Time Setup:</strong> Fill out Income with every paycheck, benefit, or recurring income source. Enter all fixed obligations in Insurance, Loans (include Buy Now Pay Later), Legal, Mortgage/Rent, Utilities, and Subscription Services. <strong class="text-amber-400">Only add Credit Cards if you carry a balance.</strong> Finally, populate Assets and Liabilities with your current bank balances, investments, and long-term debt to capture your starting Net Financial Position. This initial setup alone gives you an accurate TONIR score and net position even if you never track individual purchases.</p>
+                        
+                        <p><strong class="text-white">Reality Check:</strong> Logging every transaction to the penny is powerful, but most people burn out within 60 days. That is normal and expected. The good news is your TONIR score works without transaction-level tracking because fixed obligations drive the majority of your ratio. Groceries and fuel are variable but predictable enough that monthly totals keep your score honest.</p>
+                        
+                        <p><strong class="text-white">Sustainable Routine:</strong> When you have energy for detailed tracking, use it. Log purchases in Food and Shopping and Fuel to see what drives your variable costs. When life gets busy, fall back to entering monthly totals only. Your TONIR score will still be accurate; you just lose the ability to trace which specific purchases moved the needle.</p>
+                        
+                        <p><strong class="text-white">Monthly Minimum:</strong> Enter actual amounts for fixed bills when they arrive. Check the TONIR Dashboard for your zone status. That takes 15 minutes and keeps your score current.</p>
+                        
+                        <p><strong class="text-white">Quarterly Review:</strong> Review your individual category sections to spot trends. If your TONIR is climbing, identify which category shifted. If you stopped tracking transactions during a busy period, restart without guilt—the system waits for you. <strong class="text-white">Use this quarterly checkpoint to update your balances in Assets and Liabilities so your Net Financial Position on the Dashboard stays current.</strong></p>
+                        
+                        <p><strong class="text-white">Why Honesty Matters:</strong> TONIR runs on the honor system. Nobody verifies your entries. No bank feeds. No automated syncing. No algorithm checks your work. That means you can lie to yourself if you want to. Leave out the Amazon habit. Forget the takeout twice a week. Exclude the BNPL payment you regret. The number will look better and you will feel better, and you will be no closer to financial stability than before. The entire value of TONIR is that it tells you the truth about your situation. The moment you start selectively omitting expenses, the score becomes fiction and you are lying to the only person who matters: Yourself.</p>
+                    </div>
+
+                    <div class="bg-red-950/40 border border-red-900/50 rounded-lg p-3 text-center">
+                        <p class="text-xs font-bold text-red-400">Every dollar you spend belongs somewhere in this system. The detail you track is your choice. The truth of your score is your responsibility.</p>
+                    </div>
+                </div>
+
+                <!-- Section 3: Section Reference Manual -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Complete Section Reference Manual</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">TONIR Dashboard</strong>
+                            <p class="text-slate-400">This is where all your data combines to calculate your Total Obligations to Net Income Ratio. Enter your income totals and obligation totals from the other sections. The dashboard automatically computes your TONIR score and shows which stability zone you are in based on your percentage.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">1. Income</strong>
+                            <p class="text-slate-400">Log all your income sources here with projected versus actual amounts in both net and gross terms. Include every paycheck, pension, benefit, or side income. Mark which income is recurring versus one-time.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">2. Assets and Liabilities (Balance Sheet)</strong>
+                            <p class="text-slate-400">Tracks net worth only. Does not deduct principal balances from monthly cash flow. Manually input and updated periodically to capture your starting net financial position.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">3. Credit Cards</strong>
+                            <p class="text-slate-400">For credit cards where you carry a balance month to month. If you pay your card in full each month it does not count toward your TONIR because no ongoing obligation exists.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">4. Food and Shopping</strong>
+                            <p class="text-slate-400">Track monthly spending totals for groceries and household items. Logging projected versus actual amounts keeps your variable spending honest without burning out on line-by-line itemization.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">5. Fuel</strong>
+                            <p class="text-slate-400">Log monthly vehicle fuel totals to capture your transportation expenditures accurately. Comparing projected versus actual spending shows how travel and commuting impact your monthly cash flow.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">6. Investments</strong>
+                            <p class="text-slate-400">Record Roth IRA and 401(k) contributions separately. While these build wealth, they are committed outflows affecting your TONIR.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">7. Insurance</strong>
+                            <p class="text-slate-400">List each policy with its exact monthly premium; including auto, home or renters, life, dental, and vision. Rates sneak up over time.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">8. Legal</strong>
+                            <p class="text-slate-400">Child support and childcare costs logged per payment. Legal obligations are non-negotiable; documenting each transaction ensures nothing slips through.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">9. Loans</strong>
+                            <p class="text-slate-400">Track all loan payments and Buy Now Pay Later arrangements with notes on interest rate and payoff timeline. The monthly payment amount stays fixed for traditional loans.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">10. Mortgage or Rent</strong>
+                            <p class="text-slate-400">List rent, service fees, transaction fees, and other housing-related charges separately. Hidden costs like maintenance fees or pet charges matter.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">11. Subscription Services</strong>
+                            <p class="text-slate-400">List all subscriptions with expiration dates and auto-renewal flags. Services like streaming software or memberships drain money slowly if ignored.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">12. Utilities</strong>
+                            <p class="text-slate-400">Record electricity, water, sewage, trash, internet, and cell phone bills to the cent. High totals hide problems.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="p-6 border-t border-slate-800 flex justify-end">
+                <button onclick="toggleGuideModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2.5 rounded-lg transition">Close Guide</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Engine Logic & Multi-Year / Monthly Tabs Engine -->
+    <script>
+        const MONTHS = ["Annual", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let availableYears = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036];
+        
+        let currentYear = null;
+        let currentMonth = null;
+
+        function getEmptyState() {
+            return {
+                income: [{ name: 'Primary Salary / Paycheck', frequency: 'Recurring', net: 0, gross: 0 }],
+                assets_liabilities: [{ name: 'Checking Account', type: 'Asset', amount: 0 }],
+                credit_cards: [{ name: 'Credit Card Balance', proj: 0, act: 0 }],
+                food_shopping: [{ name: 'Groceries', proj: 0, act: 0 }],
+                fuel: [{ name: 'Vehicle Fuel', proj: 0, act: 0 }],
+                insurance: [{ name: 'Auto Insurance', proj: 0, act: 0 }],
+                investments: [{ name: 'Roth IRA / Retirement', proj: 0, act: 0 }],
+                legal: [{ name: 'Legal Obligation', proj: 0, act: 0 }],
+                loans: [{ name: 'Loan / Debt', proj: 0, act: 0 }],
+                mortgage_rent: [{ name: 'Mortgage/Rent Obligation', countInDti: true, proj: 0, act: 0 }],
+                subscription_services: [{ name: 'Streaming Service', proj: 0, act: 0 }],
+                utilities: [{ name: 'Electric / Power', proj: 0, act: 0 }]
+            };
+        }
+
+        let masterStore = {
+            years: {}
+        };
+
+        let state = getEmptyState();
+
+        function initTabs() {
+            renderYearTabs();
+            renderMonthTabs();
+            updatePeriodLabels();
+        }
+
+        function renderYearTabs() {
+            const container = document.getElementById('year-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            availableYears.forEach(yr => {
+                const btn = document.createElement('button');
+                const isActive = (yr === currentYear);
+                btn.className = isActive 
+                    ? "bg-blue-600 text-white font-bold text-xs px-4 py-2 rounded-lg transition shrink-0 shadow-md shadow-blue-900/50" 
+                    : "bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-800 transition shrink-0";
+                btn.innerText = yr;
+                btn.onclick = () => selectYear(yr);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderMonthTabs() {
+            const container = document.getElementById('month-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            MONTHS.forEach(m => {
+                const btn = document.createElement('button');
+                const isActive = (m === currentMonth);
+                const isAnnual = (m === "Annual");
+                
+                let baseClass = "text-xs transition shrink-0 border ";
+                if (isActive) {
+                    baseClass += isAnnual ? "bg-amber-600 text-white font-bold px-3.5 py-1.5 rounded-md shadow-md shadow-amber-900/50 border-amber-500" : "bg-emerald-600 text-white font-bold px-3.5 py-1.5 rounded-md shadow-md shadow-emerald-900/50 border-emerald-500";
+                } else {
+                    baseClass += isAnnual ? "bg-amber-950/30 text-amber-300 hover:bg-amber-900/40 font-semibold px-3.5 py-1.5 rounded-md border-amber-800/60" : "bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium px-3 py-1.5 rounded-md border-slate-800/60";
+                }
+                
+                btn.className = baseClass;
+                btn.innerText = isAnnual ? "Annual Baseline (Rollup)" : m;
+                btn.onclick = () => selectMonth(m);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectYear(yr) {
+            currentYear = yr;
+            if (currentMonth) {
+                if (currentMonth !== "Annual") {
+                    ensurePeriodExists(currentYear, currentMonth);
+                    state = masterStore.years[currentYear][currentMonth];
+                }
+            }
+            initTabs();
+            render();
+        }
+
+        function selectMonth(m) {
+            currentMonth = m;
+            if (currentYear) {
+                if (currentMonth === "Annual") {
+                    state = getAnnualRollupState(currentYear);
+                } else {
+                    ensurePeriodExists(currentYear, currentMonth);
+                    state = masterStore.years[currentYear][currentMonth];
+                }
+            }
+            initTabs();
+            render();
+        }
+
+        function ensurePeriodExists(yr, m) {
+            if (!masterStore.years[yr]) masterStore.years[yr] = {};
+            if (!masterStore.years[yr][m]) {
+                masterStore.years[yr][m] = getEmptyState();
+            }
+        }
+
+        function getAnnualRollupState(yr) {
+            let rollup = getEmptyState();
+            if (!masterStore.years[yr]) return rollup;
+
+            const standardMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            let categories = ['income', 'assets_liabilities', 'credit_cards', 'food_shopping', 'fuel', 'insurance', 'investments', 'legal', 'loans', 'mortgage_rent', 'subscription_services', 'utilities'];
+            
+            categories.forEach(cat => {
+                let itemMap = {};
+                standardMonths.forEach(m => {
+                    let monthData = masterStore.years[yr][m];
+                    if (monthData && monthData[cat]) {
+                        monthData[cat].forEach(entry => {
+                            let key = entry.name.trim().toLowerCase();
+                            if (!itemMap[key]) {
+                                itemMap[key] = JSON.parse(JSON.stringify(entry));
+                                if (cat === 'income') { itemMap[key].net = 0; itemMap[key].gross = 0; }
+                                else if (cat === 'assets_liabilities') { itemMap[key].amount = 0; }
+                                else if (cat === 'mortgage_rent') { itemMap[key].proj = 0; itemMap[key].act = 0; }
+                                else { itemMap[key].proj = 0; itemMap[key].act = 0; }
+                            }
+                            if (cat === 'income') {
+                                itemMap[key].net += (entry.net || 0);
+                                itemMap[key].gross += (entry.gross || 0);
+                            } else if (cat === 'assets_liabilities') {
+                                itemMap[key].amount = Math.max(itemMap[key].amount, entry.amount || 0);
+                            } else if (cat === 'mortgage_rent') {
+                                itemMap[key].proj += (entry.proj || 0);
+                                itemMap[key].act += (entry.act || 0);
+                            } else {
+                                itemMap[key].proj += (entry.proj || 0);
+                                itemMap[key].act += (entry.act || 0);
+                            }
+                        });
+                    }
+                });
+
+                let aggregatedList = Object.values(itemMap).filter(item => {
+                    if (cat === 'income') return (item.net !== 0 || item.gross !== 0);
+                    if (cat === 'assets_liabilities') return item.amount !== 0;
+                    return (item.proj !== 0 || item.act !== 0);
+                });
+
+                rollup[cat] = aggregatedList;
+            });
+            return rollup;
+        }
+
+        function promptAddYear() {
+            const input = prompt("Enter custom year (e.g., 2037):");
+            if (!input) return;
+            const yr = parseInt(input.trim());
+            if (isNaN(yr) || yr < 1900 || yr > 2100) {
+                alert("Please enter a valid four-digit year.");
+                return;
+            }
+            if (!availableYears.includes(yr)) {
+                availableYears.push(yr);
+                availableYears.sort((a,b) => a - b);
+            }
+            selectYear(yr);
+        }
+
+        function copyCurrentPeriodToNextMonth() {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal("Selection Required", "Please select a specific Year and Month tab first.");
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The Annual Baseline tab is a non-editable rollup view and cannot be copied directly. Please select an individual month tab.");
+                return;
+            }
+            const idx = MONTHS.indexOf(currentMonth);
+            let nextMonth = "Jan";
+            let targetYear = currentYear;
+
+            if (idx === -1 || currentMonth === "Annual") {
+                nextMonth = "Jan";
+            } else if (idx === MONTHS.length - 1) {
+                nextMonth = "Jan";
+                targetYear = currentYear + 1;
+                if (!availableYears.includes(targetYear)) {
+                    availableYears.push(targetYear);
+                    availableYears.sort((a,b) => a - b);
+                }
+            } else {
+                nextMonth = MONTHS[idx + 1];
+            }
+
+            ensurePeriodExists(targetYear, nextMonth);
+            masterStore.years[targetYear][nextMonth] = JSON.parse(JSON.stringify(state));
+            
+            alert(`Successfully copied ledger to ${targetYear} - ${nextMonth}`);
+            currentYear = targetYear;
+            currentMonth = nextMonth;
+            state = masterStore.years[currentYear][currentMonth];
+            initTabs();
+            render();
+        }
+
+        function updatePeriodLabels() {
+            const labelStr = (currentYear && currentMonth) 
+                ? `${currentYear} - ${currentMonth === 'Annual' ? 'Annual Baseline (Rollup)' : currentMonth}`
+                : 'None Selected (Please select Year & Month)';
+            
+            const activeLbl = document.getElementById('active-period-label');
+            const dashBadge = document.getElementById('dashboard-period-badge');
+            if (activeLbl) activeLbl.innerText = labelStr;
+            if (dashBadge) dashBadge.innerText = (currentYear && currentMonth) ? `${currentYear} (${currentMonth === 'Annual' ? 'Annual Rollup' : currentMonth})` : 'Unselected';
+        }
+
+        // --- SELECTION WARNING MODAL ---
+        function openSelectionWarningModal(title, subtitle) {
+            if (title) document.getElementById('warning-modal-title').innerText = title;
+            if (subtitle) document.getElementById('warning-modal-desc').innerHTML = subtitle;
+            document.getElementById('selection-warning-modal').classList.remove('hidden');
+        }
+
+        function closeSelectionWarningModal() {
+            document.getElementById('selection-warning-modal').classList.add('hidden');
+        }
+
+        // --- FIXED LICENSE MODAL LOGIC ---
+        function toggleAgreeButton() {
+            const checkbox = document.getElementById('license-checkbox');
+            const btn = document.getElementById('license-agree-btn');
+            if (!checkbox || !btn) return;
+            
+            if (checkbox.checked) {
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30 whitespace-nowrap";
+            } else {
+                btn.disabled = true;
+                btn.setAttribute('disabled', 'true');
+                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
+            }
+        }
+
+        function acceptLicense() {
+            const checkbox = document.getElementById('license-checkbox');
+            if (checkbox) checkbox.checked = true;
+            localStorage.setItem('tonir_license_accepted', 'true');
+            const modal = document.getElementById('license-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        // --- CLEAR DATA MODAL LOGIC WITH GRANULAR OPTIONS ---
+        function openClearWarningModal() {
+            document.getElementById('confirm-clear-checkbox').checked = false;
+            const tabBtn = document.getElementById('confirm-clear-tab-btn');
+            const allBtn = document.getElementById('confirm-clear-all-btn');
+            
+            if (currentYear && currentMonth && currentMonth !== "Annual") {
+                tabBtn.innerText = `Clear ${currentYear} - ${currentMonth} Only`;
+                tabBtn.style.display = "inline-block";
+            } else {
+                tabBtn.style.display = "none";
+            }
+
+            if (tabBtn) {
+                tabBtn.disabled = true;
+                tabBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+            }
+            if (allBtn) {
+                allBtn.disabled = true;
+                allBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+            }
+            document.getElementById('clear-warning-modal').classList.remove('hidden');
+        }
+
+        function closeClearWarningModal() {
+            document.getElementById('clear-warning-modal').classList.add('hidden');
+        }
+
+        function toggleClearButton() {
+            const checkbox = document.getElementById('confirm-clear-checkbox');
+            const tabBtn = document.getElementById('confirm-clear-tab-btn');
+            const allBtn = document.getElementById('confirm-clear-all-btn');
+            if (!checkbox) return;
+
+            if (checkbox.checked) {
+                if (tabBtn && tabBtn.style.display !== "none") {
+                    tabBtn.disabled = false;
+                    tabBtn.className = "bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-amber-950/50";
+                }
+                if (allBtn) {
+                    allBtn.disabled = false;
+                    allBtn.className = "bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-red-950/50";
+                }
+            } else {
+                if (tabBtn) {
+                    tabBtn.disabled = true;
+                    tabBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+                }
+                if (allBtn) {
+                    allBtn.disabled = true;
+                    allBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+                }
+            }
+        }
+
+        function executeClearCurrentTab() {
+            if (!currentYear || !currentMonth || currentMonth === "Annual") return;
+            closeClearWarningModal();
+            
+            masterStore.years[currentYear][currentMonth] = getEmptyState();
+            state = masterStore.years[currentYear][currentMonth];
+            saveDataSilently();
+            render();
+            alert(`Entries for ${currentYear} - ${currentMonth} have been successfully cleared.`);
+        }
+
+        function executeClearAllData() {
+            closeClearWarningModal();
+            localStorage.removeItem('tonir_master_store');
+            localStorage.removeItem('tonir_license_accepted');
+            location.reload();
+        }
+
+        function saveDataSilently() {
+            localStorage.setItem('tonir_master_store', JSON.stringify(masterStore));
+        }
+
+        function toggleGuideModal() {
+            document.getElementById('guide-modal').classList.toggle('hidden');
+        }
+
+        // --- LOAD SAMPLE TEMPLATE (TARGETED TO SELECTED INDIVIDUAL MONTH ONLY) ---
+        function loadSampleTemplate() {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal("Selection Required", "Please select a specific <strong class=\"text-white\">Year</strong> and <strong class=\"text-white\">Month</strong> tab first before loading the example template.");
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The <strong class=\"text-amber-400\">Annual Baseline</strong> tab is a non-editable rollup view that aggregates data across all months. Please select an individual month tab (e.g., Jan, Feb) to load the example template.");
+                return;
+            }
+
+            const sampleData = {
+                income: [
+                    { name: 'Salary 1', frequency: 'Recurring', net: 5874.92, gross: 7916.66 },
+                    { name: 'Pension', frequency: 'Recurring', net: 2780.42, gross: 3119.00 },
+                    { name: 'VA', frequency: 'Recurring', net: 4334.41, gross: 5115.70 }
+                ],
+                assets_liabilities: [
+                    { name: 'Primary Checking / Savings', type: 'Asset', amount: 52401.54 },
+                    { name: 'Credit Union 1', type: 'Asset', amount: 10202.35 },
+                    { name: 'Credit Union 2', type: 'Asset', amount: 5.00 },
+                    { name: 'Roth IRA', type: 'Asset', amount: 78615.88 },
+                    { name: 'Traditional IRA', type: 'Asset', amount: 14768.99 },
+                    { name: 'Employer 401(k)', type: 'Asset', amount: 1622.59 },
+                    { name: 'Auto Loan Balance', type: 'Liability', amount: 43916.86 }
+                ],
+                credit_cards: [
+                    { name: 'Visa Venture Card', proj: 0, act: 0 },
+                    { name: 'MasterCard IHG', proj: 0, act: 0 },
+                    { name: 'American Express', proj: 0, act: 0 },
+                    { name: 'Discover', proj: 0, act: 0 },
+                    { name: 'Google', proj: 0, act: 0 },
+                    { name: 'Apple', proj: 0, act: 0 }
+                ],
+                food_shopping: [
+                    { name: 'Groceries & Household', proj: 700.00, act: 640.00 }
+                ],
+                fuel: [
+                    { name: 'Vehicle Fuel', proj: 150.00, act: 140.70 }
+                ],
+                insurance: [
+                    { name: 'Progressive (Automobile)', proj: 80.35, act: 80.35 },
+                    { name: 'Progressive (Motorcycle)', proj: 42.59, act: 42.59 },
+                    { name: 'Progressive (Renters)', proj: 10.42, act: 10.42 },
+                    { name: 'Mutual of Omaha', proj: 26.75, act: 26.75 },
+                    { name: 'Mutual of Omaha 2', proj: 23.17, act: 23.17 },
+                    { name: 'BENEFED (Dental)', proj: 129.48, act: 129.48 },
+                    { name: 'BENEFED (Vision)', proj: 35.92, act: 35.92 },
+                    { name: 'Prudential (VGLI)', proj: 14.00, act: 14.00 },
+                    { name: 'Survivor Benefit Plan', proj: 6.87, act: 6.87 },
+                    { name: 'TRICARE', proj: 53.91, act: 53.91 }
+                ],
+                investments: [
+                    { name: 'Roth IRA', proj: 583.33, act: 583.33 },
+                    { name: '401k', proj: 395.84, act: 395.84 }
+                ],
+                legal: [
+                    { name: 'Child Support', proj: 1030.00, act: 1030.00 },
+                    { name: 'Child Care', proj: 0, act: 0 }
+                ],
+                loans: [
+                    { name: 'Auto Loan', proj: 914.93, act: 914.93 }
+                ],
+                mortgage_rent: [
+                    { name: 'Rent', countInDti: false, proj: 2200.00, act: 2200.00 },
+                    { name: 'Service Fee', countInDti: false, proj: 84.00, act: 84.00 },
+                    { name: 'Transaction Fee', countInDti: false, proj: 2.49, act: 2.49 }
+                ],
+                subscription_services: [
+                    { name: 'Proton Suite', proj: 7.83, act: 7.83 },
+                    { name: 'YouTube Premium', proj: 26.99, act: 26.99 }
+                ],
+                utilities: [
+                    { name: 'Power', proj: 121.50, act: 79.00 },
+                    { name: 'Water/Sewage', proj: 36.40, act: 36.40 },
+                    { name: 'Trash', proj: 25.00, act: 25.00 },
+                    { name: 'Internet', proj: 62.19, act: 62.19 },
+                    { name: 'Cell Phone', proj: 130.70, act: 130.70 }
+                ]
+            };
+
+            masterStore.years[currentYear][currentMonth] = sampleData;
+            state = masterStore.years[currentYear][currentMonth];
+            render();
+            alert(`Example template successfully loaded into ${currentYear} (${currentMonth})!`);
+        }
+
+        function render() {
+            if (!currentYear || !currentMonth) return;
+            Object.keys(state).forEach(cat => {
+                if (cat === 'income') renderTable(cat, ['name', 'frequency', 'net', 'gross']);
+                else if (cat === 'assets_liabilities') renderTable(cat, ['name', 'type', 'amount']);
+                else if (cat === 'mortgage_rent') renderTable(cat, ['name', 'countInDti', 'proj', 'act']);
+                else renderTable(cat, ['name', 'proj', 'act']);
+            });
+            calculateMetrics();
+        }
+
+        function renderTable(category, fields) {
+            const tbody = document.getElementById(`table-${category}`);
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            
+            const isReadonly = (currentMonth === "Annual");
+
+            state[category].forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-800/50 hover:bg-slate-800/30 transition';
+                
+                fields.forEach(field => {
+                    const td = document.createElement('td');
+                    td.className = 'py-2.5 px-1';
+                    if (isReadonly) {
+                        if (field === 'type' || field === 'frequency') {
+                            td.innerHTML = `<span class="text-xs text-slate-300 px-2 py-1">${item[field]}</span>`;
+                        } else if (field === 'countInDti') {
+                            td.innerHTML = `<input type="checkbox" ${item[field] ? 'checked' : ''} disabled class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 opacity-70 cursor-not-allowed">`;
+                        } else if (typeof item[field] === 'number') {
+                            td.innerHTML = `<span class="text-xs text-slate-200 font-mono px-2 py-1 block">$${item[field].toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
+                        } else {
+                            td.innerHTML = `<span class="text-xs text-slate-200 px-2 py-1 block">${item[field]}</span>`;
+                        }
+                    } else {
+                        if (field === 'type') {
+                            td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
+                                <option value="Asset" ${item[field] === 'Asset' ? 'selected' : ''}>Asset</option>
+                                <option value="Liability" ${item[field] === 'Liability' ? 'selected' : ''}>Liability</option>
+                            </select>`;
+                        } else if (field === 'frequency') {
+                            td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
+                                <option value="Recurring" ${item[field] === 'Recurring' ? 'selected' : ''}>Recurring</option>
+                                <option value="One-Time" ${item[field] === 'One-Time' ? 'selected' : ''}>One-Time</option>
+                            </select>`;
+                        } else if (field === 'countInDti') {
+                            td.innerHTML = `<input type="checkbox" ${item[field] ? 'checked' : ''} onchange="updateItem('${category}', ${index}, '${field}', this.checked)" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">`;
+                        } else if (typeof item[field] === 'number') {
+                            td.innerHTML = `<input type="number" step="0.01" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-28">`;
+                        } else {
+                            td.innerHTML = `<input type="text" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full">`;
+                        }
+                    }
+                    tr.appendChild(td);
+                });
+
+                const actionTd = document.createElement('td');
+                actionTd.className = 'py-2.5 px-1';
+                if (!isReadonly) {
+                    actionTd.innerHTML = `<button onclick="deleteItem('${category}', ${index})" class="text-red-400 hover:text-red-300 font-bold px-2 py-1">×</button>`;
+                } else {
+                    actionTd.innerHTML = `<span class="text-slate-600 text-xs">🔒</span>`;
+                }
+                tr.appendChild(actionTd);
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addItem(category) {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal();
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The Annual Baseline tab is a non-editable rollup view. Please switch to an individual month tab to add new entries.");
+                return;
+            }
+            if (category === 'assets_liabilities') state.assets_liabilities.push({ name: 'New Account', type: 'Asset', amount: 0 });
+            else if (category === 'income') state.income.push({ name: 'New Source', frequency: 'Recurring', net: 0, gross: 0 });
+            else if (category === 'mortgage_rent') state.mortgage_rent.push({ name: 'New Housing', countInDti: true, proj: 0, act: 0 });
+            else state[category].push({ name: 'New Item', proj: 0, act: 0 });
+            render();
+        }
+
+        function updateItem(category, index, field, value) {
+            if (currentMonth === "Annual") return;
+            if (['net', 'gross', 'proj', 'act', 'amount'].includes(field)) {
+                state[category][index][field] = parseFloat(value) || 0;
+            } else if (field === 'countInDti') {
+                state[category][index][field] = Boolean(value);
+            } else {
+                state[category][index][field] = value;
+            }
+            calculateMetrics();
+        }
+
+        function deleteItem(category, index) {
+            if (currentMonth === "Annual") return;
+            state[category].splice(index, 1);
+            render();
+        }
+
+        function updateCategoryBreakdown(categoryTotals, totalObligations) {
+            const barContainer = document.getElementById('breakdown-bar');
+            const legendContainer = document.getElementById('breakdown-legend');
+            document.getElementById('breakdown-total-label').innerText = 'Total Obligations: $' + totalObligations.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+            if (totalObligations <= 0) {
+                barContainer.innerHTML = '<div class="h-full bg-slate-800 w-full flex items-center justify-center text-[9px] text-slate-500">No Obligations Logged</div>';
+                legendContainer.innerHTML = '';
+                return;
+            }
+
+            const colors = {
+                'Credit Cards': 'bg-blue-500',
+                'Food & Shopping': 'bg-emerald-500',
+                'Fuel': 'bg-amber-500',
+                'Insurance': 'bg-purple-500',
+                'Investments': 'bg-cyan-500',
+                'Legal': 'bg-rose-500',
+                'Loans': 'bg-indigo-500',
+                'Mortgage / Rent': 'bg-sky-500',
+                'Subscriptions': 'bg-teal-500',
+                'Utilities': 'bg-orange-500'
+            };
+
+            let barHtml = '';
+            let legendHtml = '';
+
+            for (const [catName, amount] of Object.entries(categoryTotals)) {
+                if (amount > 0) {
+                    const pct = (amount / totalObligations) * 100;
+                    const colorClass = colors[catName] || 'bg-slate-600';
+                    barHtml += `<div style="width: ${pct}%" title="${catName}: $${amount.toFixed(2)} (${pct.toFixed(1)}%)" class="h-full ${colorClass} transition-all duration-300"></div>`;
+                    legendHtml += `<div class="flex items-center space-x-1.5"><span class="w-2.5 h-2.5 rounded-full ${colorClass} inline-block shrink-0"></span><span class="text-slate-300 truncate">${catName}: <strong class="text-white">$${amount.toFixed(0)}</strong> (${pct.toFixed(0)}%)</span></div>`;
+                }
+            }
+
+            barContainer.innerHTML = barHtml;
+            legendContainer.innerHTML = legendHtml;
+        }
+
+        function exportToPDF() {
+            window.print();
+        }
+
+        function calculateMetrics() {
+            if (!currentYear || !currentMonth) return;
+            const isAnnualRollup = (currentMonth === "Annual");
+
+            const cashFlowTitleEl = document.getElementById('metric-savings-title');
+            if (cashFlowTitleEl) {
+                cashFlowTitleEl.innerText = isAnnualRollup ? "Net Yearly Cash Flow" : "Net Monthly Cash Flow";
+            }
+
+            let totalNetIncome = state.income.filter(i => i.frequency !== 'One-Time').reduce((sum, i) => sum + i.net, 0);
+            let totalGrossIncome = state.income.filter(i => i.frequency !== 'One-Time').reduce((sum, i) => sum + i.gross, 0);
+
+            let obligationCats = ['credit_cards', 'food_shopping', 'fuel', 'insurance', 'investments', 'legal', 'loans', 'mortgage_rent', 'subscription_services', 'utilities'];
+            let totalObligations = 0;
+            obligationCats.forEach(cat => {
+                totalObligations += state[cat].reduce((sum, item) => sum + (item.act > 0 ? item.act : item.proj), 0);
+            });
+
+            let tonirScore = totalNetIncome > 0 ? (totalObligations / totalNetIncome) * 100 : 0;
+            
+            let legalTotal = state.legal.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0);
+            let ccTotal = state.credit_cards.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0);
+            let loanTotal = state.loans.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0);
+            let mortgageTotal = state.mortgage_rent.filter(i => i.countInDti).reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0);
+
+            let totalDebtObligations = legalTotal + ccTotal + loanTotal + mortgageTotal;
+            let dtiScore = totalGrossIncome > 0 ? (totalDebtObligations / totalGrossIncome) * 100 : 0;
+
+            let totalAssets = state.assets_liabilities.filter(b => b.type === 'Asset').reduce((sum, b) => sum + b.amount, 0);
+            let totalLiabilities = state.assets_liabilities.filter(b => b.type === 'Liability').reduce((sum, b) => sum + b.amount, 0);
+            let netWorth = totalAssets - totalLiabilities;
+
+            let netCashFlow = totalNetIncome - totalObligations;
+
+            document.getElementById('metric-tonir').innerText = tonirScore.toFixed(1) + '%';
+            document.getElementById('metric-dti').innerText = dtiScore.toFixed(1) + '%';
+            document.getElementById('metric-networth').innerText = '$' + netWorth.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('metric-assets').innerText = '$' + totalAssets.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('metric-liab').innerText = '($' + totalLiabilities.toLocaleString('en-US', {minimumFractionDigits: 2}) + ')';
+            
+            document.getElementById('metric-savings-actual').innerText = '$' + netCashFlow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('metric-savings-proj').innerText = '$' + totalNetIncome.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('metric-savings-diff').innerText = '$' + totalObligations.toLocaleString('en-US', {minimumFractionDigits: 2});
+
+            updateZoneBadge(tonirScore);
+
+            let catTotals = {
+                'Credit Cards': state.credit_cards.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Food & Shopping': state.food_shopping.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Fuel': state.fuel.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Insurance': state.insurance.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Investments': state.investments.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Legal': state.legal.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Loans': state.loans.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Mortgage / Rent': state.mortgage_rent.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Subscriptions': state.subscription_services.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0),
+                'Utilities': state.utilities.reduce((sum, i) => sum + (i.act > 0 ? i.act : i.proj), 0)
+            };
+            updateCategoryBreakdown(catTotals, totalObligations);
+        }
+
+        function updateZoneBadge(score) {
+            const badge = document.getElementById('tonir-zone-badge');
+            ['z1', 'z2', 'z3', 'z4', 'z5'].forEach(z => document.getElementById(`scale-${z}`).className = "p-2.5 rounded border border-slate-800 bg-slate-900");
+
+            if (score <= 0) {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-slate-800 text-slate-300";
+                badge.innerText = "Zone - Uncalculated";
+            } else if (score <= 39) {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-emerald-950 text-emerald-400 border border-emerald-800";
+                badge.innerText = "Zone 1 (Green) - Elite Stability";
+                document.getElementById('scale-z1').className = "p-2.5 rounded border border-emerald-600 bg-emerald-950/40";
+            } else if (score <= 59) {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-yellow-950 text-yellow-400 border border-yellow-800";
+                badge.innerText = "Zone 2 (Yellow) - Healthy & Sustainable";
+                document.getElementById('scale-z2').className = "p-2.5 rounded border border-yellow-600 bg-yellow-950/40";
+            } else if (score <= 79) {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-orange-950 text-orange-400 border border-orange-800";
+                badge.innerText = "Zone 3 (Orange) - Paycheck-to-Paycheck";
+                document.getElementById('scale-z3').className = "p-2.5 rounded border border-orange-600 bg-orange-950/40";
+            } else if (score <= 99) {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-red-950 text-red-400 border border-red-800";
+                badge.innerText = "Zone 4 (Red) - Financially Fragile";
+                document.getElementById('scale-z4').className = "p-2.5 rounded border border-red-600 bg-red-950/40";
+            } else {
+                badge.className = "mt-4 px-3 py-1 text-xs font-bold rounded-md inline-block w-fit bg-purple-950 text-purple-400 border border-purple-800";
+                badge.innerText = "Zone 5 (Black) - Survival Mode";
+                document.getElementById('scale-z5').className = "p-2.5 rounded border border-purple-600 bg-purple-950/40";
+            }
+        }
+
+        function saveData() {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal();
+                return;
+            }
+            localStorage.setItem('tonir_master_store', JSON.stringify(masterStore));
+            alert(`Progress saved for ${currentYear} (${currentMonth})!`);
+        }
+
+        function openExportModal() {
+            alert("To back up your multi-year data, click Save Progress. All years and months are backed up locally.");
+        }
+
+        window.onload = function() {
+            const saved = localStorage.getItem('tonir_master_store');
+            if (saved) {
+                try {
+                    masterStore = JSON.parse(saved);
+                } catch(e) { console.error(e); }
+            }
+            
+            initTabs();
+            
+            const licenseCheckbox = document.getElementById('license-checkbox');
+            if (licenseCheckbox) licenseCheckbox.checked = false;
+            
+            const licenseModal = document.getElementById('license-modal');
+            if (localStorage.getItem('tonir_license_accepted') === 'true') {
+                if (licenseModal) licenseModal.classList.add('hidden');
+            } else {
+                if (licenseModal) licenseModal.classList.remove('hidden');
+            }
+            toggleAgreeButton();
+        }
+    </script>
+</body>
+</html>
