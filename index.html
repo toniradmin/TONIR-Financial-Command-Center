@@ -842,6 +842,52 @@
             document.getElementById('guide-modal').classList.toggle('hidden');
         }
 
+        // --- BACKUP EXPORT & IMPORT LOGIC ---
+        function openExportModal() {
+            const data = localStorage.getItem('tonir_master_store');
+            if (!data) {
+                alert("No saved data found to export!");
+                return;
+            }
+            
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tonir-backup-${new Date().toISOString().slice(0, 10)}.tonir`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerImport() {
+            document.getElementById('import-file-input').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData && importedData.years) {
+                        localStorage.setItem('tonir_master_store', JSON.stringify(importedData));
+                        alert("Backup successfully imported! Reloading Command Center...");
+                        location.reload();
+                    } else {
+                        alert("Invalid backup file format.");
+                    }
+                } catch (err) {
+                    alert("Error reading backup file.");
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         // --- LOAD SAMPLE TEMPLATE (TARGETED TO SELECTED INDIVIDUAL MONTH ONLY) ---
         function loadSampleTemplate() {
             if (!currentYear || !currentMonth) {
@@ -1175,10 +1221,6 @@
             }
             localStorage.setItem('tonir_master_store', JSON.stringify(masterStore));
             alert(`Progress saved for ${currentYear} (${currentMonth})!`);
-        }
-
-        function openExportModal() {
-            alert("To back up your multi-year data, click Save Progress. All years and months are backed up locally.");
         }
 
         window.onload = function() {
