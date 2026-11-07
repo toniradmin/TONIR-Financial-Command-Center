@@ -1,7 +1,7 @@
 {
   "name": "TONIR Financial Readiness Command Center",
   "short_name": "TONIR",
-  "start_url": "./index.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#030712",
   "theme_color": "#030712",
