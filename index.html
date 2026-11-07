@@ -388,15 +388,113 @@
             <div class="p-6 border-b border-slate-800 flex justify-between items-center">
                 <div>
                     <h3 class="text-xl font-bold text-slate-100">Auditor's Guide & Manual</h3>
-                    <p class="text-sm text-slate-400">TONIR Setup Philosophy & Multi-Year Reference</p>
+                    <p class="text-sm text-slate-400">TONIR Setup Philosophy, Section Guide & Multi-Year Reference</p>
                 </div>
                 <button onclick="toggleGuideModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-3 py-1">×</button>
             </div>
             <div class="p-8 overflow-y-auto space-y-8 text-sm text-slate-200 leading-relaxed">
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-5">
-                    <h4 class="font-bold text-blue-300 text-lg">Multi-Year & Monthly Tracking Architecture</h4>
-                    <p class="text-xs text-slate-300">You can navigate across years (2026-2036+) and drill down into specific months. Use the <strong>"Copy to Next Month"</strong> feature to quickly duplicate recurring bills without manually re-entering your fixed numbers each month.</p>
+                
+                <!-- Section 1: Architecture & Setup -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Multi-Year & Monthly Tracking Architecture</h4>
+                    <p class="text-xs text-slate-300">You can navigate across years (2026-2036+) and drill down into specific months. Use the <strong>"Copy to Next Month"</strong> feature to quickly duplicate recurring bills without manually re-entering your fixed numbers each month. The <strong>Annual Baseline</strong> tab provides a clean rollup view across all populated months.</p>
                 </div>
+
+                <!-- Section 2: Setup Philosophy & Routine -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Setup Philosophy & Sustainable Routine</h4>
+                    
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <p><strong class="text-white">First Time Setup:</strong> Fill out Income with every paycheck, benefit, or recurring income source. Enter all fixed obligations in Insurance, Loans (include Buy Now Pay Later), Legal, Mortgage/Rent, Utilities, and Subscription Services. <strong class="text-amber-400">Only add Credit Cards if you carry a balance.</strong> Finally, populate Assets and Liabilities with your current bank balances, investments, and long-term debt to capture your starting Net Financial Position. This initial setup alone gives you an accurate TONIR score and net position even if you never track individual purchases.</p>
+                        
+                        <p><strong class="text-white">Reality Check:</strong> Logging every transaction to the penny is powerful, but most people burn out within 60 days. That is normal and expected. The good news is your TONIR score works without transaction-level tracking because fixed obligations drive the majority of your ratio. Groceries and fuel are variable but predictable enough that monthly totals keep your score honest.</p>
+                        
+                        <p><strong class="text-white">Sustainable Routine:</strong> When you have energy for detailed tracking, use it. Log purchases in Food and Shopping and Fuel to see what drives your variable costs. When life gets busy, fall back to entering monthly totals only. Your TONIR score will still be accurate; you just lose the ability to trace which specific purchases moved the needle.</p>
+                        
+                        <p><strong class="text-white">Monthly Minimum:</strong> Enter actual amounts for fixed bills when they arrive. Check the TONIR Dashboard for your zone status. That takes 15 minutes and keeps your score current.</p>
+                        
+                        <p><strong class="text-white">Quarterly Review:</strong> Review your individual category sections to spot trends. If your TONIR is climbing, identify which category shifted. If you stopped tracking transactions during a busy period, restart without guilt—the system waits for you. <strong class="text-white">Use this quarterly checkpoint to update your balances in Assets and Liabilities so your Net Financial Position on the Dashboard stays current.</strong></p>
+                        
+                        <p><strong class="text-white">Why Honesty Matters:</strong> TONIR runs on the honor system. Nobody verifies your entries. No bank feeds. No automated syncing. No algorithm checks your work. That means you can lie to yourself if you want to. Leave out the Amazon habit. Forget the takeout twice a week. Exclude the BNPL payment you regret. The number will look better and you will feel better, and you will be no closer to financial stability than before. The entire value of TONIR is that it tells you the truth about your situation. The moment you start selectively omitting expenses, the score becomes fiction and you are lying to the only person who matters: Yourself.</p>
+                    </div>
+
+                    <div class="bg-red-950/40 border border-red-900/50 rounded-lg p-3 text-center">
+                        <p class="text-xs font-bold text-red-400">Every dollar you spend belongs somewhere in this system. The detail you track is your choice. The truth of your score is your responsibility.</p>
+                    </div>
+                </div>
+
+                <!-- Section 3: Section Reference Manual -->
+                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-4">
+                    <h4 class="font-bold text-blue-300 text-base border-b border-slate-800 pb-2">Complete Section Reference Manual</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-300">
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">TONIR Dashboard</strong>
+                            <p class="text-slate-400">This is where all your data combines to calculate your Total Obligations to Net Income Ratio. Enter your income totals and obligation totals from the other sheets. The dashboard automatically computes your TONIR score and shows which stability zone you are in based on your percentage.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">1. Income</strong>
+                            <p class="text-slate-400">Log all your income sources here with projected versus actual amounts in both net and gross terms. Include every paycheck, pension, benefit, or side income. Mark which income is recurring versus one-time.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">2. Assets and Liabilities (Balance Sheet)</strong>
+                            <p class="text-slate-400">Tracks net worth only. Does not deduct principal balances from monthly cash flow. Manually input and updated periodically to capture your starting net financial position.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">3. Credit Cards</strong>
+                            <p class="text-slate-400">For credit cards where you carry a balance month to month. If you pay your card in full each month it does not count toward your TONIR because no ongoing obligation exists.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">4. Food and Shopping</strong>
+                            <p class="text-slate-400">Track every purchase for food, household items, and any non-rent spending. Log each transaction so you know exactly what affects your TONIR score.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">5. Fuel</strong>
+                            <p class="text-slate-400">Log every gas fill-up with date, gallons, price, and vehicle. Fuel costs change frequently, so tracking individual fill-ups shows which trips or vehicles strain your TONIR.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">6. Investments</strong>
+                            <p class="text-slate-400">Record Roth IRA and 401(k) contributions separately. While these build wealth, they are committed outflows affecting your TONIR.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">7. Insurance</strong>
+                            <p class="text-slate-400">List each policy with its exact monthly premium; including auto, home or renters, life, dental, and vision. Rates sneak up over time.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">8. Legal</strong>
+                            <p class="text-slate-400">Child support and childcare costs logged per payment. Legal obligations are non-negotiable; documenting each transaction ensures nothing slips through.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">9. Loans</strong>
+                            <p class="text-slate-400">Track all loan payments and Buy Now Pay Later arrangements with notes on interest rate and payoff timeline. The monthly payment amount stays fixed for traditional loans.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">10. Mortgage or Rent</strong>
+                            <p class="text-slate-400">List rent, service fees, transaction fees, and other housing-related charges separately. Hidden costs like maintenance fees or pet charges matter.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">11. Subscription Services</strong>
+                            <p class="text-slate-400">List all subscriptions with expiration dates and auto-renewal flags. Services like streaming software or memberships drain money slowly if ignored.</p>
+                        </div>
+
+                        <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-lg space-y-1.5">
+                            <strong class="text-white block font-semibold">12. Utilities</strong>
+                            <p class="text-slate-400">Record electricity, water, sewage, trash, internet, and cell phone bills to the cent. High totals hide problems.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
             <div class="p-6 border-t border-slate-800 flex justify-end">
                 <button onclick="toggleGuideModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2.5 rounded-lg transition">Close Guide</button>
@@ -553,7 +651,6 @@
                     }
                 });
 
-                // Filter out items where all tracked values are 0 (removes unused default placeholders)
                 let aggregatedList = Object.values(itemMap).filter(item => {
                     if (cat === 'income') return (item.net !== 0 || item.gross !== 0);
                     if (cat === 'assets_liabilities') return item.amount !== 0;
