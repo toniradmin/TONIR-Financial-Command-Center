@@ -738,23 +738,22 @@
             document.getElementById('selection-warning-modal').classList.add('hidden');
         }
 
-        // --- FIXED LICENSE MODAL LOGIC ---
-        function toggleAgreeButton() {
-            const checkbox = document.getElementById('license-checkbox');
-            const btn = document.getElementById('license-agree-btn');
-            if (!checkbox || !btn) return;
-            
-            if (checkbox.checked) {
-                btn.disabled = false;
-                btn.removeAttribute('disabled');
-                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30 whitespace-nowrap";
-            } else {
-                btn.disabled = true;
-                btn.setAttribute('disabled', 'true');
-                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
-            }
-        }
+       // --- FIXED LICENSE MODAL LOGIC ---
+function toggleAgreeButton() {
+    const checkbox = document.getElementById('license-checkbox');
+    const btn = document.getElementById('license-agree-btn');
+    if (!checkbox || !btn) return;
 
+    if (checkbox.checked) {
+        btn.disabled = false;
+        btn.removeAttribute('disabled');
+        btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer shadow-lg";
+    } else {
+        btn.disabled = true;
+        btn.setAttribute('disabled', 'true');
+        btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
+    }
+}
         function acceptLicense() {
             const checkbox = document.getElementById('license-checkbox');
             if (checkbox) checkbox.checked = true;
