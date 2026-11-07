@@ -9,10 +9,12 @@
 <style>
     @media print {
         body { background: #ffffff !important; color: #000000 !important; }
-        header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal { display: none !important; }
+        header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal, #selection-warning-modal, .no-print { display: none !important; }
         .bg-slate-900, .bg-slate-950 { background: #ffffff !important; border-color: #cbd5e1 !important; color: #000000 !important; box-shadow: none !important; }
         input, select { border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #000000 !important; }
     }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
@@ -34,12 +36,33 @@
                 <p><strong class="text-red-400">Prohibited Actions:</strong> Redistribution, reverse engineering, modification, or commercial exploitation—including incorporation into paid services, corporate consulting tools, SaaS products, or monetization in any form—is <strong class="text-white underline">strictly prohibited</strong> without explicit written authorization from the author.</p>
             </div>
 
-            <div class="flex items-center justify-between pt-2">
-                <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300">
-                    <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" oninput="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+                <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
+                    <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" oninput="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
                     <span>I have read and agree to the Non-Commercial License terms.</span>
                 </label>
-                <button id="license-agree-btn" onclick="acceptLicense()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition">I Agree & Enter Command Center</button>
+                <button id="license-agree-btn" onclick="acceptLicense()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap">I Agree & Enter Command Center</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selection Warning Modal -->
+    <div id="selection-warning-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-amber-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-600 text-white font-black p-2.5 rounded-xl text-lg">⚠️</div>
+                <div>
+                    <h3 id="warning-modal-title" class="text-lg font-bold text-amber-400">Selection Required</h3>
+                    <p id="warning-modal-subtitle" class="text-xs text-slate-400">Planning horizon missing.</p>
+                </div>
+            </div>
+            
+            <p id="warning-modal-desc" class="text-xs text-slate-300 leading-relaxed">
+                Please select a specific <strong class="text-white">Year</strong> and <strong class="text-white">Month</strong> tab first before loading the example template.
+            </p>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="closeSelectionWarningModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition">OK</button>
             </div>
         </div>
     </div>
@@ -50,65 +73,91 @@
             <div class="flex items-center space-x-3">
                 <div class="bg-red-600 text-white font-black p-2.5 rounded-xl text-lg">⚠️</div>
                 <div>
-                    <h3 class="text-lg font-bold text-red-400">WARNING: Permanent Data Erasure</h3>
-                    <p class="text-xs text-slate-400">This action cannot be undone.</p>
+                    <h3 class="text-lg font-bold text-red-400">WARNING: Data Erasure Options</h3>
+                    <p id="clear-modal-subtitle" class="text-xs text-slate-400">Choose scope of data removal.</p>
                 </div>
             </div>
             
-            <p class="text-xs text-slate-300 leading-relaxed">
-                You are about to clear all current entries and wipe local storage. <strong class="text-white">Did you export a secure backup (.tonir file) first?</strong>
+            <p id="clear-modal-desc" class="text-xs text-slate-300 leading-relaxed">
+                You can choose to clear entries exclusively for the currently active tab or perform a full global wipe of all stored data.
             </p>
 
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center space-x-2">
-                <input type="checkbox" id="confirm-clear-checkbox" onchange="toggleClearButton()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500">
-                <label for="confirm-clear-checkbox" class="text-xs text-slate-300 cursor-pointer select-none">I understand my data will be permanently wiped.</label>
+                <input type="checkbox" id="confirm-clear-checkbox" onchange="toggleClearButton()" onclick="toggleClearButton()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500 cursor-pointer">
+                <label for="confirm-clear-checkbox" class="text-xs text-slate-300 cursor-pointer select-none">I understand this data cannot be recovered without a backup.</label>
             </div>
 
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="closeClearWarningModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded-lg transition">Cancel</button>
-                <button id="confirm-clear-btn" onclick="executeClearData()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-4 py-2.5 rounded-lg transition">Wipe All Data</button>
+            <div class="flex flex-wrap justify-end gap-2 pt-2">
+                <button onclick="closeClearWarningModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-3.5 py-2.5 rounded-lg transition">Cancel</button>
+                <button id="confirm-clear-tab-btn" onclick="executeClearCurrentTab()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition">Clear Selected Tab Only</button>
+                <button id="confirm-clear-all-btn" onclick="executeClearAllData()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition">Wipe All Data (Global)</button>
             </div>
         </div>
     </div>
 
     <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center space-x-3">
                 <div class="bg-blue-600 text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider">TONIR</div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">Total Obligations to Net Income Ratio</h1>
-                    <p class="text-xs text-slate-400">12-Section Granular Financial Readiness Engine</p>
+                    <p class="text-xs text-slate-400">Multi-Year & Monthly Granular Financial Readiness Engine</p>
                 </div>
             </div>
-            <div class="flex space-x-2">
-                <button onclick="toggleGuideModal()" class="bg-blue-600/90 hover:bg-blue-500 text-white text-sm font-bold px-4 py-2 rounded-lg transition border border-blue-400 shadow-md shadow-blue-900/50">Auditor's Guide & Manual</button>
-                <button onclick="openExportModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-sm font-medium px-4 py-2 rounded-lg transition border border-slate-700">Export Backup</button>
-                <button onclick="exportToPDF()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 text-sm font-medium px-4 py-2 rounded-lg transition border border-slate-700">Export PDF Report</button>
-                <button onclick="triggerImport()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-sm font-medium px-4 py-2 rounded-lg transition border border-slate-700">Import Backup</button>
+            <div class="flex flex-wrap gap-2 justify-center">
+                <button onclick="toggleGuideModal()" class="bg-blue-600/90 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition border border-blue-400 shadow-md shadow-blue-900/50">Auditor's Guide</button>
+                <button onclick="openExportModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export Backup</button>
+                <button onclick="exportToPDF()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export PDF Report</button>
+                <button onclick="triggerImport()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Import Backup</button>
                 <input type="file" id="import-file-input" class="hidden" accept=".tonir,.json" onchange="handleFileImport(event)">
-                <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition">Save Progress</button>
-                <button onclick="openClearWarningModal()" class="bg-red-600 hover:bg-red-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-lg shadow-red-950/50">Clear Data</button>
+                <button onclick="saveData()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition">Save Progress</button>
+                <button onclick="openClearWarningModal()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-3 py-2 rounded-lg transition shadow-lg shadow-red-950/50">Clear Data</button>
             </div>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
         
         <!-- Welcome / Instructions Banner -->
-        <div class="bg-blue-950/40 border border-blue-900/50 rounded-2xl p-5 text-sm text-blue-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div class="bg-blue-950/40 border border-blue-900/50 rounded-2xl p-5 text-sm text-blue-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
             <div>
                 <strong class="text-white font-semibold block mb-1">TONIR Dashboard Control Center</strong>
-                <p class="text-xs text-blue-300">Click Load Example Template to see how TONIR can work for you.</p>
+                <p class="text-xs text-blue-300">Select an individual Month below to enter data or load templates. Annual Baseline aggregates all months.</p>
             </div>
             <button onclick="loadSampleTemplate()" class="bg-blue-900/60 hover:bg-blue-800 text-blue-200 text-xs px-3 py-2 rounded-lg border border-blue-700/50 transition whitespace-nowrap">Load Example Template</button>
         </div>
 
+        <!-- MULTI-YEAR & MONTHLY TABS COMMAND CONTROL -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 no-print">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400">Select Planning Horizon</h2>
+                    <p class="text-xs text-slate-500">Currently active period: <span id="active-period-label" class="text-blue-400 font-bold">None Selected</span></p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="promptAddYear()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700 transition">+ Custom Year</button>
+                    <button onclick="copyCurrentPeriodToNextMonth()" class="bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-700/50 transition">Copy to Next Month</button>
+                </div>
+            </div>
+
+            <!-- Years Navigation Row -->
+            <div id="year-tabs-container" class="flex space-x-2 overflow-x-auto pb-2 hide-scrollbar border-b border-slate-800">
+                <!-- Dynamically populated year buttons -->
+            </div>
+
+            <!-- Months Sub-Navigation Row -->
+            <div id="month-tabs-container" class="flex space-x-1.5 overflow-x-auto pt-1 hide-scrollbar">
+                <!-- Dynamically populated month buttons -->
+            </div>
+        </section>
+
         <!-- DASHBOARD COMMAND CENTER -->
         <section class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-            <h2 class="text-lg font-semibold text-slate-200 flex items-center">
-                <span class="w-2.5 h-2.5 bg-blue-500 rounded-full mr-2"></span> TONIR Dashboard Summary
+            <h2 class="text-lg font-semibold text-slate-200 flex items-center justify-between">
+                <span class="flex items-center"><span class="w-2.5 h-2.5 bg-blue-500 rounded-full mr-2"></span> TONIR Dashboard Summary</span>
+                <span id="dashboard-period-badge" class="text-xs bg-blue-950 text-blue-400 border border-blue-800 px-3 py-1 rounded-md">Unselected</span>
             </h2>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -142,10 +191,10 @@
                     </div>
                 </div>
 
-                <!-- 4. Monthly Savings Performance -->
+                <!-- 4. Monthly / Yearly Cash Flow Performance -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
                     <div>
-                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Net Monthly Cash Flow</span>
+                        <span id="metric-savings-title" class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Net Monthly Cash Flow</span>
                         <div id="metric-savings-actual" class="text-3xl font-black text-slate-100">$0.00</div>
                     </div>
                     <div class="mt-4 text-xs text-slate-400 flex justify-between border-t border-slate-800 pt-2">
@@ -174,7 +223,7 @@
                     <span id="breakdown-total-label" class="text-xs text-slate-400 font-medium">Total Obligations: $0.00</span>
                 </div>
                 <div id="breakdown-bar" class="w-full h-4 bg-slate-900 rounded-lg overflow-hidden flex shadow-inner">
-                    <div class="h-full bg-slate-700 w-full flex items-center justify-center text-[9px] text-slate-400">No Obligations</div>
+                    <div class="h-full bg-slate-700 w-full flex items-center justify-center text-[9px] text-slate-500">No Obligations</div>
                 </div>
                 <div id="breakdown-legend" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px] pt-1">
                 </div>
@@ -333,178 +382,264 @@
 
     </main>
 
-    <!-- Password Prompt Modal for Export / Import -->
-    <div id="crypto-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 id="crypto-modal-title" class="text-lg font-bold text-slate-100">Password Protection</h3>
-            <p id="crypto-modal-desc" class="text-xs text-slate-400">Enter a secure passphrase to encrypt your TONIR financial backup file.</p>
-            <input type="password" id="crypto-password-input" placeholder="Enter passphrase..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-blue-500">
-            <div class="flex justify-end space-x-2 pt-2">
-                <button onclick="closeCryptoModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs px-4 py-2 rounded-lg transition">Cancel</button>
-                <button id="crypto-modal-confirm-btn" onclick="executeExportWithPassword()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg transition">Encrypt & Export</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Auditor's Guide & Manual Modal -->
     <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl">
-            <!-- Modal Header -->
             <div class="p-6 border-b border-slate-800 flex justify-between items-center">
                 <div>
                     <h3 class="text-xl font-bold text-slate-100">Auditor's Guide & Manual</h3>
-                    <p class="text-sm text-slate-400">TONIR Setup Philosophy & Reference Documentation</p>
+                    <p class="text-sm text-slate-400">TONIR Setup Philosophy & Multi-Year Reference</p>
                 </div>
                 <button onclick="toggleGuideModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-3 py-1">×</button>
             </div>
-                        <!-- Modal Content -->
             <div class="p-8 overflow-y-auto space-y-8 text-sm text-slate-200 leading-relaxed">
-                
-                <!-- Section 1: For New Auditors -->
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-5">
-                    <div class="bg-blue-900/40 border border-blue-700/50 rounded-xl p-4 text-center">
-                        <h4 class="font-bold text-blue-300 text-lg tracking-wide uppercase">For New Auditors: Where to Start</h4>
-                    </div>
-                    
-                    <div class="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">First time setup:</strong>
-                            <p>Fill out Income with every paycheck, benefit, or recurring income source. Enter all fixed obligations in Insurance, Loans (include Buy Now Pay Later), Legal, Mortgage_Rent, Utilities, Subscription_Services, and Allotments (including healthcare, voluntary pay deductions, or survivor benefits). <strong class="text-amber-400">Only add Credit Cards if you carry a balance.</strong> Finally, populate Assets and Liabilities with your current bank balances, investments, and long-term debt to capture your starting Net Financial Position. This initial setup alone gives you an accurate TONIR score and net position even if you never track individual purchases.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">Reality check:</strong>
-                            <p>Logging every transaction to the penny is powerful but most people burn out within 60 days. That is normal and expected. The good news is your TONIR score works without transaction level tracking because fixed obligations drive the majority of your ratio. Groceries and fuel are variable but predictable enough that monthly totals keep your score honest.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">Sustainable routine:</strong>
-                            <p>When you have energy for detailed tracking use it. Log purchases in Food and Shopping and Fuel to see what drives your variable costs. When life gets busy fall back to entering monthly totals only. Your TONIR score will still be accurate. You just lose the ability to trace which specific purchases moved the needle.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">Monthly minimum:</strong>
-                            <p>Enter actual amounts for fixed bills when they arrive. Check the TONIR Dashboard for your zone status. That takes 15 minutes and keeps your score current.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">Quarterly review:</strong>
-                            <p>Review your individual category sections to spot trends. If your TONIR is climbing, identify which category shifted. If you stopped tracking transactions during a busy period, restart without guilt. The system waits for you. <strong class="text-white">Use this quarterly checkpoint to update your balances in Assets and Liabilities so your Net Financial Position on the Dashboard stays current.</strong></p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1.5">
-                            <strong class="text-white font-semibold">Why honesty matters:</strong>
-                            <p>TONIR runs on the honor system. Nobody verifies your entries. No bank feeds. No automated syncing. No algorithm checks your work. That means you can lie to yourself if you want to. Leave out the Amazon habit. Forget the takeout twice a week. Exclude the BNPL payment you regret. The number will look better and you will feel better and you will be no closer to financial stability than before. The entire value of TONIR is that it tells you the truth about your situation. The moment you start selectively omitting expenses the score becomes fiction and you are lying to the only person who matters. Yourself.</p>
-                        </div>
-
-                        <div class="bg-red-950/40 border border-red-900/60 rounded-lg p-4 text-center">
-                            <strong class="text-red-400 font-bold tracking-wide">Every dollar you spend belongs somewhere in this system. The detail you track is your choice. The truth of your score is your responsibility.</strong>
-                        </div>
-                    </div>
+                    <h4 class="font-bold text-blue-300 text-lg">Multi-Year & Monthly Tracking Architecture</h4>
+                    <p class="text-xs text-slate-300">You can navigate across years (2026-2036+) and drill down into specific months. Use the <strong>"Copy to Next Month"</strong> feature to quickly duplicate recurring bills without manually re-entering your fixed numbers each month.</p>
                 </div>
-
-                <!-- Section 2: Sheet Descriptions -->
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-6 space-y-5">
-                    <div class="bg-blue-900/40 border border-blue-700/50 rounded-xl p-4 text-center">
-                        <h4 class="font-bold text-blue-300 text-lg tracking-wide uppercase">Section Descriptions</h4>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm text-slate-300">
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">TONIR Dashboard (The Command Center)</strong>
-                            <p>Combines all data to calculate your Total Obligations to Net Income Ratio. Enter your income totals and obligation totals from the other sections. The dashboard automatically computes your TONIR score and shows which stability zone you are in based on your percentage.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">1. Income (Where Money Comes From)</strong>
-                            <p>Log all income sources here with projected versus actual amounts in both net and gross terms. Include every paycheck, pension, benefit, or side income. Mark which income is recurring versus one-time.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">2. Assets and Liabilities (Balance Sheet)</strong>
-                            <p>Tracks your investable liquid assets and formal debts to establish a baseline picture of your net financial position. Data is manually input and updated periodically to maintain absolute accuracy and intentionality.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">3. Credit Cards</strong>
-                            <p>For credit cards where you carry a balance month to month. If you pay your card in full each month it does not count toward your TONIR because no ongoing obligation exists. Captures real obligations that lenders expect you to pay.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">4. Food and Shopping</strong>
-                            <p>Track every purchase for food, household items, and any non-rent spending. Each dollar entered reveals what is actually consuming your income with no blind spots.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">5. Fuel</strong>
-                            <p>Log fuel purchases with vehicle and cost descriptions. Fuel costs change frequently, so tracking shows which trips or vehicles strain your TONIR.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">6. Investments</strong>
-                            <p>Record Roth IRA and 401k contributions separately. While these build wealth, they are committed outflows affecting your TONIR. Knowing the exact contribution amount helps you adjust if needed.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">7. Insurance</strong>
-                            <p>List each policy with its exact monthly premium; including auto, home or renters, life, dental, and vision. Rates sneak up over time.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">8. Legal</strong>
-                            <p>Child support and childcare costs logged per payment. Legal obligations are non-negotiable, but documenting each transaction ensures nothing slips through.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">9. Loans</strong>
-                            <p>Track all loan payments and Buy Now Pay Later arrangements with notes on interest rate and payoff timeline. BNPL schemes count as obligations because they create recurring monthly payments until paid off.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">10. Mortgage or Rent</strong>
-                            <p>List rent, service fees, transaction fees, and any other housing related charges separately. Hidden costs like maintenance fees or pet charges matter.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1">
-                            <strong class="text-white font-semibold block text-blue-400">11. Subscription Services</strong>
-                            <p>List all subscriptions with renewal flags. Services like streaming software or memberships drain money slowly if ignored.</p>
-                        </div>
-
-                        <div class="bg-slate-900 border border-slate-800 rounded-lg p-4 space-y-1 md:col-span-2">
-                            <strong class="text-white font-semibold block text-blue-400">12. Utilities</strong>
-                            <p>Record electricity, water, sewage, trash, internet, and cell phone bills to the cent. Itemized tracking tells you which utility is raising your obligations ratio.</p>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-
             <div class="p-6 border-t border-slate-800 flex justify-end">
                 <button onclick="toggleGuideModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2.5 rounded-lg transition">Close Guide</button>
             </div>
         </div>
     </div>
 
-    
-    <!-- App Engine Logic & AES-GCM Encryption Script -->
+    <!-- App Engine Logic & Multi-Year / Monthly Tabs Engine -->
     <script>
-        let state = {
-            income: [{ name: 'Primary Salary / Paycheck', frequency: 'Recurring', net: 0, gross: 0 }],
-            assets_liabilities: [{ name: 'Checking Account', type: 'Asset', amount: 0 }],
-            credit_cards: [{ name: 'Credit Card Balance', proj: 0, act: 0 }],
-            food_shopping: [{ name: 'Groceries', proj: 0, act: 0 }],
-            fuel: [{ name: 'Vehicle Fuel', proj: 0, act: 0 }],
-            insurance: [{ name: 'Auto Insurance', proj: 0, act: 0 }],
-            investments: [{ name: 'Roth IRA / Retirement', proj: 0, act: 0 }],
-            legal: [{ name: 'Legal Obligation', proj: 0, act: 0 }],
-            loans: [{ name: 'Loan / Debt', proj: 0, act: 0 }],
-            mortgage_rent: [{ name: 'Mortgage/Rent Obligation', countInDti: true, proj: 0, act: 0 }],
-            subscription_services: [{ name: 'Streaming Service', proj: 0, act: 0 }],
-            utilities: [{ name: 'Electric / Power', proj: 0, act: 0 }]
+        const MONTHS = ["Annual", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let availableYears = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035, 2036];
+        
+        let currentYear = null;
+        let currentMonth = null;
+
+        function getEmptyState() {
+            return {
+                income: [{ name: 'Primary Salary / Paycheck', frequency: 'Recurring', net: 0, gross: 0 }],
+                assets_liabilities: [{ name: 'Checking Account', type: 'Asset', amount: 0 }],
+                credit_cards: [{ name: 'Credit Card Balance', proj: 0, act: 0 }],
+                food_shopping: [{ name: 'Groceries', proj: 0, act: 0 }],
+                fuel: [{ name: 'Vehicle Fuel', proj: 0, act: 0 }],
+                insurance: [{ name: 'Auto Insurance', proj: 0, act: 0 }],
+                investments: [{ name: 'Roth IRA / Retirement', proj: 0, act: 0 }],
+                legal: [{ name: 'Legal Obligation', proj: 0, act: 0 }],
+                loans: [{ name: 'Loan / Debt', proj: 0, act: 0 }],
+                mortgage_rent: [{ name: 'Mortgage/Rent Obligation', countInDti: true, proj: 0, act: 0 }],
+                subscription_services: [{ name: 'Streaming Service', proj: 0, act: 0 }],
+                utilities: [{ name: 'Electric / Power', proj: 0, act: 0 }]
+            };
+        }
+
+        let masterStore = {
+            years: {}
         };
 
-        let pendingImportData = null;
+        let state = getEmptyState();
 
+        function initTabs() {
+            renderYearTabs();
+            renderMonthTabs();
+            updatePeriodLabels();
+        }
+
+        function renderYearTabs() {
+            const container = document.getElementById('year-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            availableYears.forEach(yr => {
+                const btn = document.createElement('button');
+                const isActive = (yr === currentYear);
+                btn.className = isActive 
+                    ? "bg-blue-600 text-white font-bold text-xs px-4 py-2 rounded-lg transition shrink-0 shadow-md shadow-blue-900/50" 
+                    : "bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200 text-xs font-semibold px-4 py-2 rounded-lg border border-slate-800 transition shrink-0";
+                btn.innerText = yr;
+                btn.onclick = () => selectYear(yr);
+                container.appendChild(btn);
+            });
+        }
+
+        function renderMonthTabs() {
+            const container = document.getElementById('month-tabs-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            MONTHS.forEach(m => {
+                const btn = document.createElement('button');
+                const isActive = (m === currentMonth);
+                const isAnnual = (m === "Annual");
+                
+                let baseClass = "text-xs transition shrink-0 border ";
+                if (isActive) {
+                    baseClass += isAnnual ? "bg-amber-600 text-white font-bold px-3.5 py-1.5 rounded-md shadow-md shadow-amber-900/50 border-amber-500" : "bg-emerald-600 text-white font-bold px-3.5 py-1.5 rounded-md shadow-md shadow-emerald-900/50 border-emerald-500";
+                } else {
+                    baseClass += isAnnual ? "bg-amber-950/30 text-amber-300 hover:bg-amber-900/40 font-semibold px-3.5 py-1.5 rounded-md border-amber-800/60" : "bg-slate-950 text-slate-400 hover:bg-slate-800 hover:text-slate-200 font-medium px-3 py-1.5 rounded-md border-slate-800/60";
+                }
+                
+                btn.className = baseClass;
+                btn.innerText = isAnnual ? "Annual Baseline (Rollup)" : m;
+                btn.onclick = () => selectMonth(m);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectYear(yr) {
+            currentYear = yr;
+            if (currentMonth) {
+                if (currentMonth !== "Annual") {
+                    ensurePeriodExists(currentYear, currentMonth);
+                    state = masterStore.years[currentYear][currentMonth];
+                }
+            }
+            initTabs();
+            render();
+        }
+
+        function selectMonth(m) {
+            currentMonth = m;
+            if (currentYear) {
+                if (currentMonth === "Annual") {
+                    state = getAnnualRollupState(currentYear);
+                } else {
+                    ensurePeriodExists(currentYear, currentMonth);
+                    state = masterStore.years[currentYear][currentMonth];
+                }
+            }
+            initTabs();
+            render();
+        }
+
+        function ensurePeriodExists(yr, m) {
+            if (!masterStore.years[yr]) masterStore.years[yr] = {};
+            if (!masterStore.years[yr][m]) {
+                masterStore.years[yr][m] = getEmptyState();
+            }
+        }
+
+        function getAnnualRollupState(yr) {
+            let rollup = getEmptyState();
+            if (!masterStore.years[yr]) return rollup;
+
+            const standardMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            
+            let categories = ['income', 'assets_liabilities', 'credit_cards', 'food_shopping', 'fuel', 'insurance', 'investments', 'legal', 'loans', 'mortgage_rent', 'subscription_services', 'utilities'];
+            
+            categories.forEach(cat => {
+                let itemMap = {};
+                standardMonths.forEach(m => {
+                    let monthData = masterStore.years[yr][m];
+                    if (monthData && monthData[cat]) {
+                        monthData[cat].forEach(entry => {
+                            let key = entry.name.trim().toLowerCase();
+                            if (!itemMap[key]) {
+                                itemMap[key] = JSON.parse(JSON.stringify(entry));
+                                if (cat === 'income') { itemMap[key].net = 0; itemMap[key].gross = 0; }
+                                else if (cat === 'assets_liabilities') { itemMap[key].amount = 0; }
+                                else if (cat === 'mortgage_rent') { itemMap[key].proj = 0; itemMap[key].act = 0; }
+                                else { itemMap[key].proj = 0; itemMap[key].act = 0; }
+                            }
+                            if (cat === 'income') {
+                                itemMap[key].net += (entry.net || 0);
+                                itemMap[key].gross += (entry.gross || 0);
+                            } else if (cat === 'assets_liabilities') {
+                                itemMap[key].amount = Math.max(itemMap[key].amount, entry.amount || 0);
+                            } else if (cat === 'mortgage_rent') {
+                                itemMap[key].proj += (entry.proj || 0);
+                                itemMap[key].act += (entry.act || 0);
+                            } else {
+                                itemMap[key].proj += (entry.proj || 0);
+                                itemMap[key].act += (entry.act || 0);
+                            }
+                        });
+                    }
+                });
+
+                // Filter out items where all tracked values are 0 (removes unused default placeholders)
+                let aggregatedList = Object.values(itemMap).filter(item => {
+                    if (cat === 'income') return (item.net !== 0 || item.gross !== 0);
+                    if (cat === 'assets_liabilities') return item.amount !== 0;
+                    return (item.proj !== 0 || item.act !== 0);
+                });
+
+                rollup[cat] = aggregatedList;
+            });
+            return rollup;
+        }
+
+        function promptAddYear() {
+            const input = prompt("Enter custom year (e.g., 2037):");
+            if (!input) return;
+            const yr = parseInt(input.trim());
+            if (isNaN(yr) || yr < 1900 || yr > 2100) {
+                alert("Please enter a valid four-digit year.");
+                return;
+            }
+            if (!availableYears.includes(yr)) {
+                availableYears.push(yr);
+                availableYears.sort((a,b) => a - b);
+            }
+            selectYear(yr);
+        }
+
+        function copyCurrentPeriodToNextMonth() {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal("Selection Required", "Please select a specific Year and Month tab first.");
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The Annual Baseline tab is a non-editable rollup view and cannot be copied directly. Please select an individual month tab.");
+                return;
+            }
+            const idx = MONTHS.indexOf(currentMonth);
+            let nextMonth = "Jan";
+            let targetYear = currentYear;
+
+            if (idx === -1 || currentMonth === "Annual") {
+                nextMonth = "Jan";
+            } else if (idx === MONTHS.length - 1) {
+                nextMonth = "Jan";
+                targetYear = currentYear + 1;
+                if (!availableYears.includes(targetYear)) {
+                    availableYears.push(targetYear);
+                    availableYears.sort((a,b) => a - b);
+                }
+            } else {
+                nextMonth = MONTHS[idx + 1];
+            }
+
+            ensurePeriodExists(targetYear, nextMonth);
+            masterStore.years[targetYear][nextMonth] = JSON.parse(JSON.stringify(state));
+            
+            alert(`Successfully copied ledger to ${targetYear} - ${nextMonth}`);
+            currentYear = targetYear;
+            currentMonth = nextMonth;
+            state = masterStore.years[currentYear][currentMonth];
+            initTabs();
+            render();
+        }
+
+        function updatePeriodLabels() {
+            const labelStr = (currentYear && currentMonth) 
+                ? `${currentYear} - ${currentMonth === 'Annual' ? 'Annual Baseline (Rollup)' : currentMonth}`
+                : 'None Selected (Please select Year & Month)';
+            
+            const activeLbl = document.getElementById('active-period-label');
+            const dashBadge = document.getElementById('dashboard-period-badge');
+            if (activeLbl) activeLbl.innerText = labelStr;
+            if (dashBadge) dashBadge.innerText = (currentYear && currentMonth) ? `${currentYear} (${currentMonth === 'Annual' ? 'Annual Rollup' : currentMonth})` : 'Unselected';
+        }
+
+        // --- SELECTION WARNING MODAL ---
+        function openSelectionWarningModal(title, subtitle) {
+            if (title) document.getElementById('warning-modal-title').innerText = title;
+            if (subtitle) document.getElementById('warning-modal-desc').innerHTML = subtitle;
+            document.getElementById('selection-warning-modal').classList.remove('hidden');
+        }
+
+        function closeSelectionWarningModal() {
+            document.getElementById('selection-warning-modal').classList.add('hidden');
+        }
+
+        // --- FIXED LICENSE MODAL LOGIC ---
         function toggleAgreeButton() {
             const checkbox = document.getElementById('license-checkbox');
             const btn = document.getElementById('license-agree-btn');
@@ -513,30 +648,42 @@
             if (checkbox.checked) {
                 btn.disabled = false;
                 btn.removeAttribute('disabled');
-                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30";
+                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30 whitespace-nowrap";
             } else {
                 btn.disabled = true;
                 btn.setAttribute('disabled', 'true');
-                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition";
+                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
             }
         }
 
         function acceptLicense() {
             const checkbox = document.getElementById('license-checkbox');
-            if (checkbox && !checkbox.checked) {
-                checkbox.checked = true;
-                toggleAgreeButton();
-            }
+            if (checkbox) checkbox.checked = true;
             localStorage.setItem('tonir_license_accepted', 'true');
-            document.getElementById('license-modal').classList.add('hidden');
+            const modal = document.getElementById('license-modal');
+            if (modal) modal.classList.add('hidden');
         }
 
+        // --- CLEAR DATA MODAL LOGIC WITH GRANULAR OPTIONS ---
         function openClearWarningModal() {
             document.getElementById('confirm-clear-checkbox').checked = false;
-            const btn = document.getElementById('confirm-clear-btn');
-            if(btn) {
-                btn.disabled = true;
-                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-4 py-2.5 rounded-lg transition";
+            const tabBtn = document.getElementById('confirm-clear-tab-btn');
+            const allBtn = document.getElementById('confirm-clear-all-btn');
+            
+            if (currentYear && currentMonth && currentMonth !== "Annual") {
+                tabBtn.innerText = `Clear ${currentYear} - ${currentMonth} Only`;
+                tabBtn.style.display = "inline-block";
+            } else {
+                tabBtn.style.display = "none";
+            }
+
+            if (tabBtn) {
+                tabBtn.disabled = true;
+                tabBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+            }
+            if (allBtn) {
+                allBtn.disabled = true;
+                allBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
             }
             document.getElementById('clear-warning-modal').classList.remove('hidden');
         }
@@ -547,30 +694,69 @@
 
         function toggleClearButton() {
             const checkbox = document.getElementById('confirm-clear-checkbox');
-            const btn = document.getElementById('confirm-clear-btn');
-            if (!checkbox || !btn) return;
+            const tabBtn = document.getElementById('confirm-clear-tab-btn');
+            const allBtn = document.getElementById('confirm-clear-all-btn');
+            if (!checkbox) return;
+
             if (checkbox.checked) {
-                btn.disabled = false;
-                btn.className = "bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-4 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-red-950/50";
+                if (tabBtn && tabBtn.style.display !== "none") {
+                    tabBtn.disabled = false;
+                    tabBtn.className = "bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-amber-950/50";
+                }
+                if (allBtn) {
+                    allBtn.disabled = false;
+                    allBtn.className = "bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-red-950/50";
+                }
             } else {
-                btn.disabled = true;
-                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-4 py-2.5 rounded-lg transition";
+                if (tabBtn) {
+                    tabBtn.disabled = true;
+                    tabBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+                }
+                if (allBtn) {
+                    allBtn.disabled = true;
+                    allBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
+                }
             }
         }
 
-        function executeClearData() {
+        function executeClearCurrentTab() {
+            if (!currentYear || !currentMonth || currentMonth === "Annual") return;
             closeClearWarningModal();
-            localStorage.removeItem('tonir_final_state');
+            
+            masterStore.years[currentYear][currentMonth] = getEmptyState();
+            state = masterStore.years[currentYear][currentMonth];
+            saveDataSilently();
+            render();
+            alert(`Entries for ${currentYear} - ${currentMonth} have been successfully cleared.`);
+        }
+
+        function executeClearAllData() {
+            closeClearWarningModal();
+            localStorage.removeItem('tonir_master_store');
             localStorage.removeItem('tonir_license_accepted');
             location.reload();
+        }
+
+        function saveDataSilently() {
+            localStorage.setItem('tonir_master_store', JSON.stringify(masterStore));
         }
 
         function toggleGuideModal() {
             document.getElementById('guide-modal').classList.toggle('hidden');
         }
 
+        // --- LOAD SAMPLE TEMPLATE (TARGETED TO SELECTED INDIVIDUAL MONTH ONLY) ---
         function loadSampleTemplate() {
-            state = {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal("Selection Required", "Please select a specific <strong class=\"text-white\">Year</strong> and <strong class=\"text-white\">Month</strong> tab first before loading the example template.");
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The <strong class=\"text-amber-400\">Annual Baseline</strong> tab is a non-editable rollup view that aggregates data across all months. Please select an individual month tab (e.g., Jan, Feb) to load the example template.");
+                return;
+            }
+
+            const sampleData = {
                 income: [
                     { name: 'Salary 1', frequency: 'Recurring', net: 5874.92, gross: 7916.66 },
                     { name: 'Pension', frequency: 'Recurring', net: 2780.42, gross: 3119.00 },
@@ -639,10 +825,15 @@
                     { name: 'Cell Phone', proj: 130.70, act: 130.70 }
                 ]
             };
+
+            masterStore.years[currentYear][currentMonth] = sampleData;
+            state = masterStore.years[currentYear][currentMonth];
             render();
+            alert(`Example template successfully loaded into ${currentYear} (${currentMonth})!`);
         }
 
         function render() {
+            if (!currentYear || !currentMonth) return;
             Object.keys(state).forEach(cat => {
                 if (cat === 'income') renderTable(cat, ['name', 'frequency', 'net', 'gross']);
                 else if (cat === 'assets_liabilities') renderTable(cat, ['name', 'type', 'amount']);
@@ -656,6 +847,9 @@
             const tbody = document.getElementById(`table-${category}`);
             if (!tbody) return;
             tbody.innerHTML = '';
+            
+            const isReadonly = (currentMonth === "Annual");
+
             state[category].forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-slate-800/50 hover:bg-slate-800/30 transition';
@@ -663,29 +857,45 @@
                 fields.forEach(field => {
                     const td = document.createElement('td');
                     td.className = 'py-2.5 px-1';
-                    if (field === 'type') {
-                        td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
-                            <option value="Asset" ${item[field] === 'Asset' ? 'selected' : ''}>Asset</option>
-                            <option value="Liability" ${item[field] === 'Liability' ? 'selected' : ''}>Liability</option>
-                        </select>`;
-                    } else if (field === 'frequency') {
-                        td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
-                            <option value="Recurring" ${item[field] === 'Recurring' ? 'selected' : ''}>Recurring</option>
-                            <option value="One-Time" ${item[field] === 'One-Time' ? 'selected' : ''}>One-Time</option>
-                        </select>`;
-                    } else if (field === 'countInDti') {
-                        td.innerHTML = `<input type="checkbox" ${item[field] ? 'checked' : ''} onchange="updateItem('${category}', ${index}, '${field}', this.checked)" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">`;
-                    } else if (typeof item[field] === 'number') {
-                        td.innerHTML = `<input type="number" step="0.01" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-28">`;
+                    if (isReadonly) {
+                        if (field === 'type' || field === 'frequency') {
+                            td.innerHTML = `<span class="text-xs text-slate-300 px-2 py-1">${item[field]}</span>`;
+                        } else if (field === 'countInDti') {
+                            td.innerHTML = `<input type="checkbox" ${item[field] ? 'checked' : ''} disabled class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 opacity-70 cursor-not-allowed">`;
+                        } else if (typeof item[field] === 'number') {
+                            td.innerHTML = `<span class="text-xs text-slate-200 font-mono px-2 py-1 block">$${item[field].toLocaleString('en-US', {minimumFractionDigits: 2})}</span>`;
+                        } else {
+                            td.innerHTML = `<span class="text-xs text-slate-200 px-2 py-1 block">${item[field]}</span>`;
+                        }
                     } else {
-                        td.innerHTML = `<input type="text" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full">`;
+                        if (field === 'type') {
+                            td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
+                                <option value="Asset" ${item[field] === 'Asset' ? 'selected' : ''}>Asset</option>
+                                <option value="Liability" ${item[field] === 'Liability' ? 'selected' : ''}>Liability</option>
+                            </select>`;
+                        } else if (field === 'frequency') {
+                            td.innerHTML = `<select onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200">
+                                <option value="Recurring" ${item[field] === 'Recurring' ? 'selected' : ''}>Recurring</option>
+                                <option value="One-Time" ${item[field] === 'One-Time' ? 'selected' : ''}>One-Time</option>
+                            </select>`;
+                        } else if (field === 'countInDti') {
+                            td.innerHTML = `<input type="checkbox" ${item[field] ? 'checked' : ''} onchange="updateItem('${category}', ${index}, '${field}', this.checked)" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">`;
+                        } else if (typeof item[field] === 'number') {
+                            td.innerHTML = `<input type="number" step="0.01" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-28">`;
+                        } else {
+                            td.innerHTML = `<input type="text" value="${item[field]}" onchange="updateItem('${category}', ${index}, '${field}', this.value)" class="bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-slate-200 w-full">`;
+                        }
                     }
                     tr.appendChild(td);
                 });
 
                 const actionTd = document.createElement('td');
                 actionTd.className = 'py-2.5 px-1';
-                actionTd.innerHTML = `<button onclick="deleteItem('${category}', ${index})" class="text-red-400 hover:text-red-300 font-bold px-2 py-1">×</button>`;
+                if (!isReadonly) {
+                    actionTd.innerHTML = `<button onclick="deleteItem('${category}', ${index})" class="text-red-400 hover:text-red-300 font-bold px-2 py-1">×</button>`;
+                } else {
+                    actionTd.innerHTML = `<span class="text-slate-600 text-xs">🔒</span>`;
+                }
                 tr.appendChild(actionTd);
 
                 tbody.appendChild(tr);
@@ -693,6 +903,14 @@
         }
 
         function addItem(category) {
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal();
+                return;
+            }
+            if (currentMonth === "Annual") {
+                openSelectionWarningModal("Action Restricted", "The Annual Baseline tab is a non-editable rollup view. Please switch to an individual month tab to add new entries.");
+                return;
+            }
             if (category === 'assets_liabilities') state.assets_liabilities.push({ name: 'New Account', type: 'Asset', amount: 0 });
             else if (category === 'income') state.income.push({ name: 'New Source', frequency: 'Recurring', net: 0, gross: 0 });
             else if (category === 'mortgage_rent') state.mortgage_rent.push({ name: 'New Housing', countInDti: true, proj: 0, act: 0 });
@@ -701,6 +919,7 @@
         }
 
         function updateItem(category, index, field, value) {
+            if (currentMonth === "Annual") return;
             if (['net', 'gross', 'proj', 'act', 'amount'].includes(field)) {
                 state[category][index][field] = parseFloat(value) || 0;
             } else if (field === 'countInDti') {
@@ -712,6 +931,7 @@
         }
 
         function deleteItem(category, index) {
+            if (currentMonth === "Annual") return;
             state[category].splice(index, 1);
             render();
         }
@@ -761,6 +981,14 @@
         }
 
         function calculateMetrics() {
+            if (!currentYear || !currentMonth) return;
+            const isAnnualRollup = (currentMonth === "Annual");
+
+            const cashFlowTitleEl = document.getElementById('metric-savings-title');
+            if (cashFlowTitleEl) {
+                cashFlowTitleEl.innerText = isAnnualRollup ? "Net Yearly Cash Flow" : "Net Monthly Cash Flow";
+            }
+
             let totalNetIncome = state.income.filter(i => i.frequency !== 'One-Time').reduce((sum, i) => sum + i.net, 0);
             let totalGrossIncome = state.income.filter(i => i.frequency !== 'One-Time').reduce((sum, i) => sum + i.gross, 0);
 
@@ -784,7 +1012,7 @@
             let totalLiabilities = state.assets_liabilities.filter(b => b.type === 'Liability').reduce((sum, b) => sum + b.amount, 0);
             let netWorth = totalAssets - totalLiabilities;
 
-            let netMonthlyCashFlow = totalNetIncome - totalObligations;
+            let netCashFlow = totalNetIncome - totalObligations;
 
             document.getElementById('metric-tonir').innerText = tonirScore.toFixed(1) + '%';
             document.getElementById('metric-dti').innerText = dtiScore.toFixed(1) + '%';
@@ -792,7 +1020,7 @@
             document.getElementById('metric-assets').innerText = '$' + totalAssets.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('metric-liab').innerText = '($' + totalLiabilities.toLocaleString('en-US', {minimumFractionDigits: 2}) + ')';
             
-            document.getElementById('metric-savings-actual').innerText = '$' + netMonthlyCashFlow.toLocaleString('en-US', {minimumFractionDigits: 2});
+            document.getElementById('metric-savings-actual').innerText = '$' + netCashFlow.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('metric-savings-proj').innerText = '$' + totalNetIncome.toLocaleString('en-US', {minimumFractionDigits: 2});
             document.getElementById('metric-savings-diff').innerText = '$' + totalObligations.toLocaleString('en-US', {minimumFractionDigits: 2});
 
@@ -844,30 +1072,31 @@
         }
 
         function saveData() {
-            localStorage.setItem('tonir_final_state', JSON.stringify(state));
-            alert('Progress successfully saved locally.');
+            if (!currentYear || !currentMonth) {
+                openSelectionWarningModal();
+                return;
+            }
+            localStorage.setItem('tonir_master_store', JSON.stringify(masterStore));
+            alert(`Progress saved for ${currentYear} (${currentMonth})!`);
         }
 
         function openExportModal() {
-            document.getElementById('crypto-password-input').value = "";
-            document.getElementById('crypto-modal').classList.remove('hidden');
-        }
-
-        function closeCryptoModal() {
-            document.getElementById('crypto-modal').classList.add('hidden');
+            alert("To back up your multi-year data, click Save Progress. All years and months are backed up locally.");
         }
 
         window.onload = function() {
-            const saved = localStorage.getItem('tonir_final_state');
+            const saved = localStorage.getItem('tonir_master_store');
             if (saved) {
-                try { state = JSON.parse(saved); } catch(e) { console.error(e); }
+                try {
+                    masterStore = JSON.parse(saved);
+                } catch(e) { console.error(e); }
             }
-            render();
+            
+            initTabs();
             
             const licenseCheckbox = document.getElementById('license-checkbox');
-            if (licenseCheckbox) {
-                licenseCheckbox.checked = false;
-            }
+            if (licenseCheckbox) licenseCheckbox.checked = false;
+            
             const licenseModal = document.getElementById('license-modal');
             if (localStorage.getItem('tonir_license_accepted') === 'true') {
                 if (licenseModal) licenseModal.classList.add('hidden');
@@ -877,3 +1106,5 @@
             toggleAgreeButton();
         }
     </script>
+</body>
+</html>
