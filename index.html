@@ -16,8 +16,6 @@
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 </style>
-    <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#030712">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
     
@@ -40,7 +38,7 @@
 
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
                 <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
-                   <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" oninput="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
                     <span>I have read and agree to the Non-Commercial License terms.</span>
                 </label>
                 <button id="license-agree-btn" onclick="acceptLicense()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap">I Agree & Enter Command Center</button>
@@ -738,22 +736,23 @@
             document.getElementById('selection-warning-modal').classList.add('hidden');
         }
 
-       // --- FIXED LICENSE MODAL LOGIC ---
-function toggleAgreeButton() {
-    const checkbox = document.getElementById('license-checkbox');
-    const btn = document.getElementById('license-agree-btn');
-    if (!checkbox || !btn) return;
+        // --- FIXED LICENSE MODAL LOGIC ---
+        function toggleAgreeButton() {
+            const checkbox = document.getElementById('license-checkbox');
+            const btn = document.getElementById('license-agree-btn');
+            if (!checkbox || !btn) return;
+            
+            if (checkbox.checked) {
+                btn.disabled = false;
+                btn.removeAttribute('disabled');
+                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30 whitespace-nowrap";
+            } else {
+                btn.disabled = true;
+                btn.setAttribute('disabled', 'true');
+                btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
+            }
+        }
 
-    if (checkbox.checked) {
-        btn.disabled = false;
-        btn.removeAttribute('disabled');
-        btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer shadow-lg";
-    } else {
-        btn.disabled = true;
-        btn.setAttribute('disabled', 'true');
-        btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
-    }
-}
         function acceptLicense() {
             const checkbox = document.getElementById('license-checkbox');
             if (checkbox) checkbox.checked = true;
@@ -1203,13 +1202,6 @@ function toggleAgreeButton() {
             }
             toggleAgreeButton();
         }
-<script>
-    // Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js');
-      });
-    }
-</script>
+    </script>
 </body>
 </html>
