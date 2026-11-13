@@ -9,7 +9,7 @@
 <style>
     @media print {
         body { background: #ffffff !important; color: #000000 !important; }
-        header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal, #selection-warning-modal, .no-print { display: none !important; }
+        header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal, #zones-modal, #selection-warning-modal, .no-print { display: none !important; }
         .bg-slate-900, .bg-slate-950 { background: #ffffff !important; border-color: #cbd5e1 !important; color: #000000 !important; box-shadow: none !important; }
         input, select { border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #000000 !important; }
     }
@@ -107,6 +107,7 @@
             </div>
             <div class="flex flex-wrap gap-2 justify-center">
                 <button onclick="toggleGuideModal()" class="bg-blue-600/90 hover:bg-blue-500 text-white text-xs font-bold px-3 py-2 rounded-lg transition border border-blue-400 shadow-md shadow-blue-900/50">Auditor's Guide</button>
+                <button onclick="toggleZonesModal()" class="bg-emerald-700/90 hover:bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition border border-emerald-500 shadow-md shadow-emerald-900/50">Zone Descriptions</button>
                 <button onclick="openExportModal()" class="bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export Backup</button>
                 <button onclick="exportToPDF()" class="bg-slate-800 hover:bg-slate-700 text-purple-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Export PDF Report</button>
                 <button onclick="triggerImport()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-medium px-3 py-2 rounded-lg transition border border-slate-700">Import Backup</button>
@@ -210,7 +211,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-5 gap-2 text-xs">
                     <div id="scale-z1" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-emerald-400 block">0-39%</span> Zone 1 (Green): Elite</div>
                     <div id="scale-z2" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-yellow-400 block">40-59%</span> Zone 2 (Yellow): Healthy</div>
-                    <div id="scale-z3" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-orange-400 block">60-79%</span> Zone 3 (Orange): Paycheck</div>
+                    <div id="scale-z3" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-orange-400 block">60-79%</span> Zone 3 (Orange): Paycheck-to-Paycheck</div>
                     <div id="scale-z4" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-red-400 block">80-99%</span> Zone 4 (Red): Fragile</div>
                     <div id="scale-z5" class="p-2.5 rounded border border-slate-800 bg-slate-900"><span class="font-bold text-purple-400 block">100%+</span> Zone 5 (Black): Survival</div>
                 </div>
@@ -381,6 +382,60 @@
         </div>
 
     </main>
+
+    <!-- Zone Descriptions Modal -->
+    <div id="zones-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-4xl w-full max-h-[85vh] flex flex-col shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-100">TONIR Stability Zone Reference Manual</h3>
+                    <p class="text-sm text-slate-400">Detailed Breakdown of Financial Health Tiers (0% - 100%+)</p>
+                </div>
+                <button onclick="toggleZonesModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-3 py-1">×</button>
+            </div>
+            <div class="p-8 overflow-y-auto space-y-6 text-sm text-slate-200 leading-relaxed">
+                
+                <!-- Zone 1 -->
+                <div class="bg-slate-950 border border-emerald-900/50 rounded-xl p-6 space-y-2">
+                    <h4 class="font-bold text-emerald-400 text-base">Zone 1 (Green) — Elite Stability (0–39%)</h4>
+                    <p class="text-xs text-slate-400 font-semibold">This is extremely rare (Top 5–10% of households).</p>
+                    <p class="text-xs text-slate-300">People in this range have high income, low fixed obligations, strong liquidity, save aggressively, have minimal volatility, and rarely use credit cards.</p>
+                </div>
+
+                <!-- Zone 2 -->
+                <div class="bg-slate-950 border border-yellow-900/50 rounded-xl p-6 space-y-2">
+                    <h4 class="font-bold text-yellow-400 text-base">Zone 2 (Yellow) — Healthy, Sustainable, Realistic (40–59%)</h4>
+                    <p class="text-xs text-slate-400 font-semibold">This is where financially stable adults with kids actually live.</p>
+                    <p class="text-xs text-slate-300">People in this range have real obligations (kids, cars, insurance, rent), save consistently, don’t rely on credit cards, can handle emergencies, and maintain predictable cash flow. This is the real version of "financially healthy."</p>
+                </div>
+
+                <!-- Zone 3 -->
+                <div class="bg-slate-950 border border-orange-900/50 rounded-xl p-6 space-y-2">
+                    <h4 class="font-bold text-orange-400 text-base">Zone 3 (Orange) — Paycheck-to-Paycheck but Stable (60–79%)</h4>
+                    <p class="text-xs text-slate-400 font-semibold">This is the average American middle-class household.</p>
+                    <p class="text-xs text-slate-300">People in this range cover their bills, have little savings, rely on credit cards occasionally, feel financial pressure, can’t absorb big shocks, and have unpredictable months.</p>
+                </div>
+
+                <!-- Zone 4 -->
+                <div class="bg-slate-950 border border-red-900/50 rounded-xl p-6 space-y-2">
+                    <h4 class="font-bold text-red-400 text-base">Zone 4 (Red) — Financially Fragile (80–99%)</h4>
+                    <p class="text-xs text-slate-400 font-semibold">This is where life becomes mathematically unstable (40–50% of households).</p>
+                    <p class="text-xs text-slate-300">People in this range use credit cards to survive, have no savings, can’t handle emergencies, are one bad month away from crisis, and feel constant financial anxiety.</p>
+                </div>
+
+                <!-- Zone 5 -->
+                <div class="bg-slate-950 border border-purple-900/50 rounded-xl p-6 space-y-2">
+                    <h4 class="font-bold text-purple-400 text-base">Zone 5 (Black) — Negative Cash Flow / Survival Mode (100%+)</h4>
+                    <p class="text-xs text-slate-400 font-semibold">This is where obligations exceed income (Millions of households).</p>
+                    <p class="text-xs text-slate-300">People in this range are drowning, accumulating debt, in crisis, living entirely on credit, and financially stuck.</p>
+                </div>
+
+            </div>
+            <div class="p-6 border-t border-slate-800 flex justify-end">
+                <button onclick="toggleZonesModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm px-5 py-2.5 rounded-lg transition">Close Zone Descriptions</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Auditor's Guide & Manual Modal -->
     <div id="guide-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -840,6 +895,10 @@
 
         function toggleGuideModal() {
             document.getElementById('guide-modal').classList.toggle('hidden');
+        }
+
+        function toggleZonesModal() {
+            document.getElementById('zones-modal').classList.toggle('hidden');
         }
 
         // --- BACKUP EXPORT & IMPORT LOGIC ---
