@@ -11,7 +11,7 @@
         body { background: #ffffff !important; color: #000000 !important; }
         header, button, input[type="file"], .bg-blue-950\/40, #license-modal, #clear-warning-modal, #crypto-modal, #guide-modal, #zones-modal, #selection-warning-modal, .no-print { display: none !important; }
         .bg-slate-900, .bg-slate-950 { background: #ffffff !important; border-color: #cbd5e1 !important; color: #000000 !important; box-shadow: none !important; }
-        input, select { border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #000000 !important; }
+        input, select, textarea { border: 1px solid #cbd5e1 !important; background: #f8fafc !important; color: #000000 !important; }
     }
     .hide-scrollbar::-webkit-scrollbar { display: none; }
     .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -151,6 +151,25 @@
             <!-- Months Sub-Navigation Row -->
             <div id="month-tabs-container" class="flex space-x-1.5 overflow-x-auto pt-1 hide-scrollbar">
                 <!-- Dynamically populated month buttons -->
+            </div>
+        </section>
+
+        <!-- MONTHLY NOTES & AUDIT TRAIL WIDGET (COLLAPSIBLE) -->
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+            <button onclick="toggleNotesPanel()" class="w-full px-6 py-4 flex justify-between items-center bg-slate-900 hover:bg-slate-800/60 transition text-left">
+                <div class="flex items-center space-x-2">
+                    <span class="text-blue-400 text-sm">📝</span>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300">Monthly Context & Audit Notes</h3>
+                    <span id="notes-indicator" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700">Empty</span>
+                </div>
+                <span id="notes-chevron" class="text-slate-400 text-xs transform transition-transform duration-200">▼ Expand</span>
+            </button>
+            <div id="notes-content-area" class="hidden p-6 pt-0 border-t border-slate-800/60 bg-slate-950/40 space-y-3">
+                <div class="pt-3 flex justify-between items-center text-xs text-slate-400">
+                    <p>Record key events, bill payment confirmations, or why expenses spiked this month.</p>
+                    <span id="notes-status" class="text-[11px] text-emerald-400 font-medium">Auto-saved</span>
+                </div>
+                <textarea id="monthly-notes-textarea" oninput="updateMonthlyNotes(this.value)" placeholder="e.g., Nov 13: Bought Christmas plane tickets ($640). Electric bill higher due to AC running continuously." class="w-full h-28 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-blue-600 transition resize-y"></textarea>
             </div>
         </section>
 
@@ -567,6 +586,7 @@
 
         function getEmptyState() {
             return {
+                notes: '',
                 income: [{ name: 'Primary Salary / Paycheck', frequency: 'Recurring', net: 0, gross: 0 }],
                 assets_liabilities: [{ name: 'Checking Account', type: 'Asset', amount: 0 }],
                 credit_cards: [{ name: 'Credit Card Balance', amount: 0 }],
@@ -674,6 +694,16 @@
 
             const standardMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             
+            // Aggregate Notes for Annual View
+            let allNotes = [];
+            standardMonths.forEach(m => {
+                let mData = masterStore.years[yr][m];
+                if (mData && mData.notes && mData.notes.trim() !== "") {
+                    allNotes.push(`[${m}]: ${mData.notes.trim()}`);
+                }
+            });
+            rollup.notes = allNotes.join("\n\n");
+
             let categories = ['income', 'assets_liabilities', 'credit_cards', 'food_shopping', 'fuel', 'insurance', 'investments', 'legal', 'loans', 'mortgage_rent', 'subscription_services', 'utilities'];
             
             categories.forEach(cat => {
@@ -696,7 +726,6 @@
                             } else if (cat === 'assets_liabilities') {
                                 itemMap[key].amount = Math.max(itemMap[key].amount, entry.amount || 0);
                             } else {
-                                // Fallback support if old backup data had proj/act keys
                                 let val = (entry.amount !== undefined) ? entry.amount : (entry.act > 0 ? entry.act : (entry.proj || 0));
                                 itemMap[key].amount += val;
                             }
@@ -776,6 +805,53 @@
             const dashBadge = document.getElementById('dashboard-period-badge');
             if (activeLbl) activeLbl.innerText = labelStr;
             if (dashBadge) dashBadge.innerText = (currentYear && currentMonth) ? `${currentYear} (${currentMonth === 'Annual' ? 'Annual Rollup' : currentMonth})` : 'Unselected';
+        }
+
+        // --- COLLAPSIBLE NOTES PANEL LOGIC ---
+        function toggleNotesPanel() {
+            const content = document.getElementById('notes-content-area');
+            const chevron = document.getElementById('notes-chevron');
+            if (!content || !chevron) return;
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevron.innerText = "▲ Collapse";
+            } else {
+                content.classList.add('hidden');
+                chevron.innerText = "▼ Expand";
+            }
+        }
+
+        function updateMonthlyNotes(val) {
+            if (currentMonth === "Annual") return;
+            state.notes = val;
+            updateNotesIndicator();
+            saveDataSilently();
+        }
+
+        function updateNotesIndicator() {
+            const indicator = document.getElementById('notes-indicator');
+            const textarea = document.getElementById('monthly-notes-textarea');
+            if (!indicator || !textarea) return;
+
+            textarea.value = state.notes || '';
+            
+            if (currentMonth === "Annual") {
+                textarea.disabled = true;
+                textarea.className = "w-full h-32 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 resize-none opacity-90";
+                indicator.innerText = "Annual Log";
+                indicator.className = "text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded-full border border-amber-800";
+            } else {
+                textarea.disabled = false;
+                textarea.className = "w-full h-28 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none focus:border-blue-600 transition resize-y";
+                if (state.notes && state.notes.trim().length > 0) {
+                    indicator.innerText = "Active Notes";
+                    indicator.className = "text-[10px] bg-blue-950 text-blue-300 px-2 py-0.5 rounded-full border border-blue-800";
+                } else {
+                    indicator.innerText = "Empty";
+                    indicator.className = "text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full border border-slate-700";
+                }
+            }
         }
 
         // --- SELECTION WARNING MODAL ---
@@ -931,24 +1007,6 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (importedData && importedData.years) {
-                        // Migrate legacy backups if needed
-                        Object.keys(importedData.years).forEach(yr => {
-                            Object.keys(importedData.years[yr]).forEach(m => {
-                                let mData = importedData.years[yr][m];
-                                let cats = ['credit_cards', 'food_shopping', 'fuel', 'insurance', 'investments', 'legal', 'loans', 'mortgage_rent', 'subscription_services', 'utilities'];
-                                cats.forEach(c => {
-                                    if (mData[c]) {
-                                        mData[c].forEach(item => {
-                                            if (item.amount === undefined) {
-                                                item.amount = item.act > 0 ? item.act : (item.proj || 0);
-                                                delete item.proj;
-                                                delete item.act;
-                                            }
-                                        });
-                                    }
-                                });
-                            });
-                        });
                         localStorage.setItem('tonir_master_store', JSON.stringify(importedData));
                         alert("Backup successfully imported! Reloading Command Center...");
                         location.reload();
@@ -963,18 +1021,19 @@
             reader.readAsText(file);
         }
 
-        // --- LOAD SAMPLE TEMPLATE (TARGETED TO SELECTED INDIVIDUAL MONTH ONLY) ---
+        // --- LOAD SAMPLE TEMPLATE ---
         function loadSampleTemplate() {
             if (!currentYear || !currentMonth) {
                 openSelectionWarningModal("Selection Required", "Please select a specific <strong class=\"text-white\">Year</strong> and <strong class=\"text-white\">Month</strong> tab first before loading the example template.");
                 return;
             }
             if (currentMonth === "Annual") {
-                openSelectionWarningModal("Action Restricted", "The <strong class=\"text-amber-400\">Annual Baseline</strong> tab is a non-editable rollup view that aggregates data across all months. Please select an individual month tab (e.g., Jan, Feb) to load the example template.");
+                openSelectionWarningModal("Action Restricted", "The <strong class=\"text-amber-400\">Annual Baseline</strong> tab is a non-editable rollup view. Please select an individual month tab to load the example template.");
                 return;
             }
 
             const sampleData = {
+                notes: "Nov 13: Bought Christmas plane tickets ($640).\nElectric bill slightly higher due to AC running continuously.",
                 income: [
                     { name: 'Salary 1', frequency: 'Recurring', net: 5874.92, gross: 7916.66 },
                     { name: 'Pension', frequency: 'Recurring', net: 2780.42, gross: 3119.00 },
@@ -1052,7 +1111,9 @@
 
         function render() {
             if (!currentYear || !currentMonth) return;
+            updateNotesIndicator();
             Object.keys(state).forEach(cat => {
+                if (cat === 'notes') return;
                 if (cat === 'income') renderTable(cat, ['name', 'frequency', 'net', 'gross']);
                 else if (cat === 'assets_liabilities') renderTable(cat, ['name', 'type', 'amount']);
                 else if (cat === 'mortgage_rent') renderTable(cat, ['name', 'countInDti', 'amount']);
