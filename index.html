@@ -38,7 +38,7 @@
 
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
                 <label class="flex items-center space-x-2 cursor-pointer text-xs text-slate-300 select-none">
-                    <input type="checkbox" id="license-checkbox" onchange="toggleAgreeButton()" onclick="toggleAgreeButton()" oninput="toggleAgreeButton()" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                    <input type="checkbox" id="license-checkbox" class="w-4 h-4 rounded bg-slate-950 border-slate-700 text-blue-600 focus:ring-blue-500 cursor-pointer">
                     <span>I have read and agree to the Non-Commercial License terms.</span>
                 </label>
                 <button id="license-agree-btn" onclick="acceptLicense()" disabled class="bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap">I Agree & Enter Command Center</button>
@@ -83,7 +83,7 @@
             </p>
 
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center space-x-2">
-                <input type="checkbox" id="confirm-clear-checkbox" onchange="toggleClearButton()" onclick="toggleClearButton()" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500 cursor-pointer">
+                <input type="checkbox" id="confirm-clear-checkbox" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-red-600 focus:ring-red-500 cursor-pointer">
                 <label for="confirm-clear-checkbox" class="text-xs text-slate-300 cursor-pointer select-none">I understand this data cannot be recovered without a backup.</label>
             </div>
 
@@ -121,13 +121,19 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-8 space-y-6">
         
-        <!-- Welcome / Instructions Banner -->
-        <div class="bg-blue-950/40 border border-blue-900/50 rounded-2xl p-5 text-sm text-blue-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
-            <div>
-                <strong class="text-white font-semibold block mb-1">TONIR Dashboard Control Center</strong>
-                <p class="text-xs text-blue-300">Select an individual Month below to enter data or load templates. Annual Baseline aggregates all months.</p>
+        <!-- Welcome / Scenario Presets Banner -->
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4 no-print">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-sm font-bold uppercase tracking-wider text-slate-300">Scenario Preset Selector</h2>
+                    <p class="text-xs text-slate-400">Instantly load realistic financial profiles into the currently selected Year & Month tab.</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="loadSampleTemplate(1)" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-2 rounded-lg border border-blue-400 transition shadow-md shadow-blue-900/50">Profile 1: Baseline (Yellow)</button>
+                    <button onclick="loadSampleTemplate(2)" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold px-3 py-2 rounded-lg border border-amber-500 transition shadow-md shadow-amber-900/50">Profile 2: ETSing E-4 (Orange)</button>
+                    <button onclick="loadSampleTemplate(3)" class="bg-red-600 hover:bg-red-500 text-white text-xs font-semibold px-3 py-2 rounded-lg border border-red-500 transition shadow-md shadow-red-950/50">Profile 3: Retiring E-8 (Red)</button>
+                </div>
             </div>
-            <button onclick="loadSampleTemplate()" class="bg-blue-900/60 hover:bg-blue-800 text-blue-200 text-xs px-3 py-2 rounded-lg border border-blue-700/50 transition whitespace-nowrap">Load Example Template</button>
         </div>
 
         <!-- MULTI-YEAR & MONTHLY TABS COMMAND CONTROL -->
@@ -694,7 +700,6 @@
 
             const standardMonths = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             
-            // Aggregate Notes for Annual View
             let allNotes = [];
             standardMonths.forEach(m => {
                 let mData = masterStore.years[yr][m];
@@ -807,7 +812,6 @@
             if (dashBadge) dashBadge.innerText = (currentYear && currentMonth) ? `${currentYear} (${currentMonth === 'Annual' ? 'Annual Rollup' : currentMonth})` : 'Unselected';
         }
 
-        // --- COLLAPSIBLE NOTES PANEL LOGIC ---
         function toggleNotesPanel() {
             const content = document.getElementById('notes-content-area');
             const chevron = document.getElementById('notes-chevron');
@@ -854,7 +858,6 @@
             }
         }
 
-        // --- SELECTION WARNING MODAL ---
         function openSelectionWarningModal(title, subtitle) {
             if (title) document.getElementById('warning-modal-title').innerText = title;
             if (subtitle) document.getElementById('warning-modal-desc').innerHTML = subtitle;
@@ -865,32 +868,28 @@
             document.getElementById('selection-warning-modal').classList.add('hidden');
         }
 
-        // --- FIXED LICENSE MODAL LOGIC ---
-        function toggleAgreeButton() {
+        // Fixed Robust License Modal Logic
+        function updateAgreeButtonState() {
             const checkbox = document.getElementById('license-checkbox');
             const btn = document.getElementById('license-agree-btn');
             if (!checkbox || !btn) return;
             
             if (checkbox.checked) {
-                btn.disabled = false;
                 btn.removeAttribute('disabled');
-                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer pointer-events-auto shadow-lg shadow-blue-600/30 whitespace-nowrap";
+                btn.className = "bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium px-5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-blue-600/30 whitespace-nowrap";
             } else {
-                btn.disabled = true;
                 btn.setAttribute('disabled', 'true');
                 btn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-5 py-2.5 rounded-lg transition whitespace-nowrap";
             }
         }
 
         function acceptLicense() {
-            const checkbox = document.getElementById('license-checkbox');
-            if (checkbox) checkbox.checked = true;
             localStorage.setItem('tonir_license_accepted', 'true');
             const modal = document.getElementById('license-modal');
             if (modal) modal.classList.add('hidden');
         }
 
-        // --- CLEAR DATA MODAL LOGIC WITH GRANULAR OPTIONS ---
+        // Clear Data Modal Logic
         function openClearWarningModal() {
             document.getElementById('confirm-clear-checkbox').checked = false;
             const tabBtn = document.getElementById('confirm-clear-tab-btn');
@@ -918,7 +917,7 @@
             document.getElementById('clear-warning-modal').classList.add('hidden');
         }
 
-        function toggleClearButton() {
+        function updateClearButtonsState() {
             const checkbox = document.getElementById('confirm-clear-checkbox');
             const tabBtn = document.getElementById('confirm-clear-tab-btn');
             const allBtn = document.getElementById('confirm-clear-all-btn');
@@ -926,20 +925,20 @@
 
             if (checkbox.checked) {
                 if (tabBtn && tabBtn.style.display !== "none") {
-                    tabBtn.disabled = false;
+                    tabBtn.removeAttribute('disabled');
                     tabBtn.className = "bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-amber-950/50";
                 }
                 if (allBtn) {
-                    allBtn.disabled = false;
+                    allBtn.removeAttribute('disabled');
                     allBtn.className = "bg-red-600 hover:bg-red-500 text-white text-xs font-medium px-3.5 py-2.5 rounded-lg transition cursor-pointer shadow-lg shadow-red-950/50";
                 }
             } else {
                 if (tabBtn) {
-                    tabBtn.disabled = true;
+                    tabBtn.setAttribute('disabled', 'true');
                     tabBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
                 }
                 if (allBtn) {
-                    allBtn.disabled = true;
+                    allBtn.setAttribute('disabled', 'true');
                     allBtn.className = "bg-slate-800 text-slate-500 cursor-not-allowed text-xs font-medium px-3.5 py-2.5 rounded-lg transition";
                 }
             }
@@ -975,7 +974,6 @@
             document.getElementById('zones-modal').classList.toggle('hidden');
         }
 
-        // --- BACKUP EXPORT & IMPORT LOGIC ---
         function openExportModal() {
             const data = localStorage.getItem('tonir_master_store');
             if (!data) {
@@ -1021,92 +1019,158 @@
             reader.readAsText(file);
         }
 
-        // --- LOAD SAMPLE TEMPLATE ---
-        function loadSampleTemplate() {
+        function loadSampleTemplate(presetId = 1) {
             if (!currentYear || !currentMonth) {
-                openSelectionWarningModal("Selection Required", "Please select a specific <strong class=\"text-white\">Year</strong> and <strong class=\"text-white\">Month</strong> tab first before loading the example template.");
+                openSelectionWarningModal("Selection Required", "Please select a specific Year and Month tab first before loading an example profile.");
                 return;
             }
             if (currentMonth === "Annual") {
-                openSelectionWarningModal("Action Restricted", "The <strong class=\"text-amber-400\">Annual Baseline</strong> tab is a non-editable rollup view. Please select an individual month tab to load the example template.");
+                openSelectionWarningModal("Action Restricted", "The Annual Baseline tab is a non-editable rollup view. Please select an individual month tab to load a profile.");
                 return;
             }
 
-            const sampleData = {
-                notes: "Nov 13: Bought Christmas plane tickets ($640).\nElectric bill slightly higher due to AC running continuously.",
-                income: [
-                    { name: 'Salary 1', frequency: 'Recurring', net: 5874.92, gross: 7916.66 },
-                    { name: 'Pension', frequency: 'Recurring', net: 2780.42, gross: 3119.00 },
-                    { name: 'VA', frequency: 'Recurring', net: 4334.41, gross: 5115.70 }
-                ],
-                assets_liabilities: [
-                    { name: 'Primary Checking / Savings', type: 'Asset', amount: 52401.54 },
-                    { name: 'Credit Union 1', type: 'Asset', amount: 10202.35 },
-                    { name: 'Credit Union 2', type: 'Asset', amount: 5.00 },
-                    { name: 'Roth IRA', type: 'Asset', amount: 78615.88 },
-                    { name: 'Traditional IRA', type: 'Asset', amount: 14768.99 },
-                    { name: 'Employer 401(k)', type: 'Asset', amount: 1622.59 },
-                    { name: 'Auto Loan Balance', type: 'Liability', amount: 43916.86 }
-                ],
-                credit_cards: [
-                    { name: 'Visa Venture Card', amount: 0 },
-                    { name: 'MasterCard IHG', amount: 0 },
-                    { name: 'American Express', amount: 0 },
-                    { name: 'Discover', amount: 0 },
-                    { name: 'Google', amount: 0 },
-                    { name: 'Apple', amount: 0 }
-                ],
-                food_shopping: [
-                    { name: 'Groceries & Household', amount: 640.00 }
-                ],
-                fuel: [
-                    { name: 'Vehicle Fuel', amount: 140.70 }
-                ],
-                insurance: [
-                    { name: 'Progressive (Automobile)', amount: 80.35 },
-                    { name: 'Progressive (Motorcycle)', amount: 42.59 },
-                    { name: 'Progressive (Renters)', amount: 10.42 },
-                    { name: 'Mutual of Omaha', amount: 26.75 },
-                    { name: 'Mutual of Omaha 2', amount: 23.17 },
-                    { name: 'BENEFED (Dental)', amount: 129.48 },
-                    { name: 'BENEFED (Vision)', amount: 35.92 },
-                    { name: 'Prudential (VGLI)', amount: 14.00 },
-                    { name: 'Survivor Benefit Plan', amount: 6.87 },
-                    { name: 'TRICARE', amount: 53.91 }
-                ],
-                investments: [
-                    { name: 'Roth IRA', amount: 583.33 },
-                    { name: '401k', amount: 395.84 }
-                ],
-                legal: [
-                    { name: 'Child Support', amount: 1030.00 },
-                    { name: 'Child Care', amount: 0 }
-                ],
-                loans: [
-                    { name: 'Auto Loan', amount: 914.93 }
-                ],
-                mortgage_rent: [
-                    { name: 'Rent', countInDti: false, amount: 2200.00 },
-                    { name: 'Service Fee', countInDti: false, amount: 84.00 },
-                    { name: 'Transaction Fee', countInDti: false, amount: 2.49 }
-                ],
-                subscription_services: [
-                    { name: 'Proton Suite', amount: 7.83 },
-                    { name: 'YouTube Premium', amount: 26.99 }
-                ],
-                utilities: [
-                    { name: 'Power', amount: 79.00 },
-                    { name: 'Water/Sewage', amount: 36.40 },
-                    { name: 'Trash', amount: 25.00 },
-                    { name: 'Internet', amount: 62.19 },
-                    { name: 'Cell Phone', amount: 130.70 }
-                ]
-            };
+            let sampleData;
+
+            if (presetId === 1) {
+                sampleData = {
+                    notes: "Profile 1 Baseline: Established career tier with pension, VA disability, and optimized fixed debt.",
+                    income: [
+                        { name: 'Salary 1', frequency: 'Recurring', net: 5874.92, gross: 7916.66 },
+                        { name: 'Pension', frequency: 'Recurring', net: 2780.42, gross: 3119.00 },
+                        { name: 'VA Disability', frequency: 'Recurring', net: 4334.41, gross: 5115.70 }
+                    ],
+                    assets_liabilities: [
+                        { name: 'Primary Checking / Savings', type: 'Asset', amount: 52401.54 },
+                        { name: 'Credit Union Savings', type: 'Asset', amount: 10202.35 },
+                        { name: 'Roth IRA', type: 'Asset', amount: 78615.88 },
+                        { name: 'Auto Loan Balance', type: 'Liability', amount: 43916.86 }
+                    ],
+                    credit_cards: [
+                        { name: 'Revolving Balances', amount: 0 }
+                    ],
+                    food_shopping: [
+                        { name: 'Groceries & Household', amount: 640.00 }
+                    ],
+                    fuel: [
+                        { name: 'Vehicle Fuel', amount: 140.70 }
+                    ],
+                    insurance: [
+                        { name: 'Auto & Renters Insurance', amount: 133.36 },
+                        { name: 'Life & Medical (TRICARE/Dental)', amount: 251.05 }
+                    ],
+                    investments: [
+                        { name: 'Roth IRA & Retirement', amount: 979.17 }
+                    ],
+                    legal: [
+                        { name: 'Child Support', amount: 1030.00 }
+                    ],
+                    loans: [
+                        { name: 'Auto Loan Payment', amount: 914.93 }
+                    ],
+                    mortgage_rent: [
+                        { name: 'Rent & Fees', countInDti: false, amount: 2286.49 }
+                    ],
+                    subscription_services: [
+                        { name: 'Secure Software & Streaming', amount: 34.82 }
+                    ],
+                    utilities: [
+                        { name: 'Power, Water, Trash, Net, Mobile', amount: 333.29 }
+                    ]
+                };
+            } else if (presetId === 2) {
+                sampleData = {
+                    notes: "Profile 2: ETSing E-4 Junior NCO. 30% VA rating ($524.31/mo), entry civilian job ($3,400 net/mo). Total Net Income = $3,924.31. Total Obligations = $2,575.00 (~65.6% TONIR - Orange Zone).",
+                    income: [
+                        { name: 'Civilian Transition Salary', frequency: 'Recurring', net: 3400.00, gross: 4200.00 },
+                        { name: 'VA Disability (30%)', frequency: 'Recurring', net: 524.31, gross: 524.31 }
+                    ],
+                    assets_liabilities: [
+                        { name: 'Checking Account', type: 'Asset', amount: 1450.00 },
+                        { name: 'Used Car Loan', type: 'Liability', amount: 12500.00 }
+                    ],
+                    credit_cards: [
+                        { name: 'Starter Credit Card Minimum', amount: 50.00 }
+                    ],
+                    food_shopping: [
+                        { name: 'Groceries & Household', amount: 450.00 }
+                    ],
+                    fuel: [
+                        { name: 'Vehicle Fuel & Commute', amount: 160.00 }
+                    ],
+                    insurance: [
+                        { name: 'Auto & Renters Insurance', amount: 145.00 }
+                    ],
+                    investments: [
+                        { name: 'Retirement Savings', amount: 0.00 }
+                    ],
+                    legal: [
+                        { name: 'Legal Obligations', amount: 0.00 }
+                    ],
+                    loans: [
+                        { name: 'Used Car Payment', amount: 350.00 }
+                    ],
+                    mortgage_rent: [
+                        { name: '1-Bedroom Apartment Rent', countInDti: true, amount: 1200.00 }
+                    ],
+                    subscription_services: [
+                        { name: 'Phone & Streaming', amount: 95.00 }
+                    ],
+                    utilities: [
+                        { name: 'Electric & Water', amount: 125.00 }
+                    ]
+                };
+            } else if (presetId === 3) {
+                sampleData = {
+                    notes: "Profile 3: Retiring E-8. Pension + Consulting Net Income = $6,700.00. Total Obligations = $6,370.00 (~95.1% TONIR - Red Zone). Heavy mortgage, dual car payments, CC minimums, and lifestyle inflation.",
+                    income: [
+                        { name: 'Military Retirement Pension', frequency: 'Recurring', net: 4200.00, gross: 4800.00 },
+                        { name: 'Part-Time Consulting Side Gig', frequency: 'Recurring', net: 2500.00, gross: 3100.00 }
+                    ],
+                    assets_liabilities: [
+                        { name: 'Checking Account', type: 'Asset', amount: 480.00 },
+                        { name: 'Primary Mortgage Balance', type: 'Liability', amount: 395000.00 },
+                        { name: 'Truck Auto Loan', type: 'Liability', amount: 48000.00 },
+                        { name: 'SUV Auto Loan', type: 'Liability', amount: 32000.00 },
+                        { name: 'Credit Card Debt', type: 'Liability', amount: 11200.00 }
+                    ],
+                    credit_cards: [
+                        { name: 'Revolving Balances (Minimums)', amount: 420.00 }
+                    ],
+                    food_shopping: [
+                        { name: 'Groceries & Dining Out', amount: 850.00 }
+                    ],
+                    fuel: [
+                        { name: 'Dual Vehicles Fuel', amount: 340.00 }
+                    ],
+                    insurance: [
+                        { name: 'Auto & Homeowners Insurance', amount: 320.00 }
+                    ],
+                    investments: [
+                        { name: 'Retirement Contributions', amount: 0.00 }
+                    ],
+                    legal: [
+                        { name: 'Alimony / Child Support', amount: 500.00 }
+                    ],
+                    loans: [
+                        { name: 'Truck Payment', amount: 680.00 },
+                        { name: 'SUV Payment', amount: 490.00 }
+                    ],
+                    mortgage_rent: [
+                        { name: 'Primary Mortgage & HOA', countInDti: true, amount: 2150.00 }
+                    ],
+                    subscription_services: [
+                        { name: 'Subscriptions & Memberships', amount: 150.00 }
+                    ],
+                    utilities: [
+                        { name: 'Power, Water, Internet, Cellular', amount: 370.00 }
+                    ]
+                };
+            }
 
             masterStore.years[currentYear][currentMonth] = sampleData;
             state = masterStore.years[currentYear][currentMonth];
             render();
-            alert(`Example template successfully loaded into ${currentYear} (${currentMonth})!`);
+            alert(`Example Profile ${presetId} successfully loaded into ${currentYear} (${currentMonth})!`);
         }
 
         function render() {
@@ -1362,6 +1426,7 @@
             alert(`Progress saved for ${currentYear} (${currentMonth})!`);
         }
 
+        // Attach event listeners safely on DOM load to prevent any modal state locking
         window.onload = function() {
             const saved = localStorage.getItem('tonir_master_store');
             if (saved) {
@@ -1373,7 +1438,17 @@
             initTabs();
             
             const licenseCheckbox = document.getElementById('license-checkbox');
-            if (licenseCheckbox) licenseCheckbox.checked = false;
+            if (licenseCheckbox) {
+                licenseCheckbox.checked = false;
+                licenseCheckbox.onchange = updateAgreeButtonState;
+                licenseCheckbox.onclick = updateAgreeButtonState;
+            }
+
+            const confirmClearCheckbox = document.getElementById('confirm-clear-checkbox');
+            if (confirmClearCheckbox) {
+                confirmClearCheckbox.onchange = updateClearButtonsState;
+                confirmClearCheckbox.onclick = updateClearButtonsState;
+            }
             
             const licenseModal = document.getElementById('license-modal');
             if (localStorage.getItem('tonir_license_accepted') === 'true') {
@@ -1381,7 +1456,7 @@
             } else {
                 if (licenseModal) licenseModal.classList.remove('hidden');
             }
-            toggleAgreeButton();
+            updateAgreeButtonState();
         }
     </script>
 </body>
